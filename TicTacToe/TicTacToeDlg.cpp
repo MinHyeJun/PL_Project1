@@ -119,7 +119,7 @@ BOOL CTicTacToeDlg::OnInitDialog()
 
 	m_isLoad = 0;  // 게임 로드 여부 초기화
 	m_checkUndo = 0;  // 무르기 여부 초기화
-	m_startCom = 1;  ////////////////////////////////////////////
+	m_startCom = 0;  ////////////////////////////////////////////
 
 	SetGame();  // 게임 셋팅
 	
@@ -280,15 +280,15 @@ int CTicTacToeDlg::CheckReady()
 	{
 		switch(level_a)  // 선택된 레벨 정보에 따라 컴퓨터 A의 레벨 셋팅
 		{
-		case 0 : m_levelA = 3; break;			
-		case 1 : m_levelA = 5; break;			
+		case 0 : m_levelA = 2; break;			
+		case 1 : m_levelA = 4; break;			
 		
 		}
 
 		switch(level_b)  // 선택된 레벨 정보에 따라 컴퓨터 B의 레벨 셋팅
 		{
-		case 0 : m_levelB = 2; break;			
-		case 1 : m_levelB = 4; break;			
+		case 0 : m_levelB = 3; break;			
+		case 1 : m_levelB = 5; break;			
 		
 		}
 
@@ -302,12 +302,12 @@ void CTicTacToeDlg::SetGame()
 	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
 
 	// 컴퓨터 A의 evaluate 레벨 선택 콤보박스에 레벨 셋팅
-	m_comboA.AddString(L"Level 3");
-	m_comboA.AddString(L"Level 5");
+	m_comboA.AddString(L"Level 2");
+	m_comboA.AddString(L"Level 4");
 
 	// 컴퓨터 B의 evaluate 레벨 선택 콤보박스에 레벨 셋팅
-	m_comboB.AddString(L"Level 2");
-	m_comboB.AddString(L"Level 4");
+	m_comboB.AddString(L"Level 3");
+	m_comboB.AddString(L"Level 5");
 
 	// 두 컴퓨터의 상태창에 초기 텍스트를 셋팅
 	GetDlgItem(IDC_EDIT_A)->SetWindowTextW(L"<게임 트리>");
@@ -467,7 +467,7 @@ void CTicTacToeDlg::ResetGame()
 	CString tempStr, str;
 	int count = 0;  // 게임 보드판의 버튼을 숫자로 바꾸기 위해 숫자를 담는 변수
 
-	m_startCom = 1;  // 시작한 컴퓨터 종류 초기화
+	m_startCom = 0;  // 시작한 컴퓨터 종류 초기화
 	UpdateData(FALSE);
 
 	m_board.state = GameBoard::STATE_INIT;  // 게임 상태를 초기화로 지정
