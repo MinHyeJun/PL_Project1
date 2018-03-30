@@ -50,7 +50,6 @@ END_MESSAGE_MAP()
 
 CTicTacToeDlg::CTicTacToeDlg(CWnd* pParent /*=NULL*/)
 	: CDialogEx(CTicTacToeDlg::IDD, pParent)
-	, m_startCom(-1)
 {
 	m_hIcon = AfxGetApp()->LoadIcon(IDR_MAINFRAME);
 }
@@ -64,7 +63,6 @@ void CTicTacToeDlg::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_COMBO_B, m_comboB);
 	DDX_Control(pDX, IDC_EDIT_A, m_listA);
 	DDX_Control(pDX, IDC_EDIT_B, m_listB);
-	DDX_Radio(pDX, IDC_RADIO_A, m_startCom);
 }
 
 BEGIN_MESSAGE_MAP(CTicTacToeDlg, CDialogEx)
@@ -121,6 +119,7 @@ BOOL CTicTacToeDlg::OnInitDialog()
 
 	m_isLoad = 0;  // 게임 로드 여부 초기화
 	m_checkUndo = 0;  // 무르기 여부 초기화
+	m_startCom = 1;  ////////////////////////////////////////////
 
 	SetGame();  // 게임 셋팅
 	
@@ -468,7 +467,7 @@ void CTicTacToeDlg::ResetGame()
 	CString tempStr, str;
 	int count = 0;  // 게임 보드판의 버튼을 숫자로 바꾸기 위해 숫자를 담는 변수
 
-	m_startCom = -1;  // 시작한 컴퓨터 종류 초기화
+	m_startCom = 1;  // 시작한 컴퓨터 종류 초기화
 	UpdateData(FALSE);
 
 	m_board.state = GameBoard::STATE_INIT;  // 게임 상태를 초기화로 지정
