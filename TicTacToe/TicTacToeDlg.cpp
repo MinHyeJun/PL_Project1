@@ -312,11 +312,11 @@ void CTicTacToeDlg::SetGame()
 	m_comboB.AddString(L"Level 3");
 	m_comboB.AddString(L"Level 5");
 
+	m_comboB.SetCurSel(0);
+	m_levelB = 3;
+
 	// 두 컴퓨터의 상태창에 초기 텍스트를 셋팅
 	GetDlgItem(IDC_EDIT_B)->SetWindowTextW(L"<게임 트리>");
-
-	// 두 컴퓨터의 evaluate 레벨 초기화
-	m_levelB = 0;
 }
 
 /**
@@ -467,7 +467,8 @@ void CTicTacToeDlg::ResetGame()
 	// 한 수 무르기 버튼의 접근을 false로 변경
 	m_undoA.EnableWindow(FALSE);
 	// 레벨 선택 콤보박스의 텍스트들을 모두 초기화
-	m_comboB.SetCurSel(-1);
+	m_comboB.SetCurSel(0);
+	m_levelB = 3;
 }
 
 /**
@@ -737,7 +738,7 @@ void CTicTacToeDlg::PlayAI()
 void CTicTacToeDlg::OnBnClickedA1()
 {
 	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
-	if (m_board.state == GameBoard::STATE_PLAY && m_board.order == 0 && m_board.board[0][0] != 'O')
+	if (m_board.state == GameBoard::STATE_PLAY && m_board.order == 0 && m_board.board[0][0] == ' ')
 	{
 		GetDlgItem(IDC_A1)->SetWindowTextW(L"X");
 		m_board.DoMove(0, 0);
@@ -760,7 +761,7 @@ void CTicTacToeDlg::OnBnClickedA1()
 void CTicTacToeDlg::OnBnClickedA2()
 {
 	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
-	if (m_board.state == GameBoard::STATE_PLAY && m_board.order == 0 && m_board.board[0][1] != 'O')
+	if (m_board.state == GameBoard::STATE_PLAY && m_board.order == 0 && m_board.board[0][1] == ' ')
 	{
 		GetDlgItem(IDC_A2)->SetWindowTextW(L"X");
 		m_board.DoMove(0, 1);
@@ -784,7 +785,7 @@ void CTicTacToeDlg::OnBnClickedA2()
 void CTicTacToeDlg::OnBnClickedA3()
 {
 	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
-	if (m_board.state == GameBoard::STATE_PLAY && m_board.order == 0 && m_board.board[0][2] != 'O')
+	if (m_board.state == GameBoard::STATE_PLAY && m_board.order == 0 && m_board.board[0][2] == ' ')
 	{
 		GetDlgItem(IDC_A3)->SetWindowTextW(L"X");
 		m_board.DoMove(0, 2);
@@ -808,7 +809,7 @@ void CTicTacToeDlg::OnBnClickedA3()
 void CTicTacToeDlg::OnBnClickedA4()
 {
 	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
-	if (m_board.state == GameBoard::STATE_PLAY && m_board.order == 0 && m_board.board[0][3] != 'O')
+	if (m_board.state == GameBoard::STATE_PLAY && m_board.order == 0 && m_board.board[0][3] == ' ')
 	{
 		GetDlgItem(IDC_A4)->SetWindowTextW(L"X");
 		m_board.DoMove(0, 3);
@@ -832,7 +833,7 @@ void CTicTacToeDlg::OnBnClickedA4()
 void CTicTacToeDlg::OnBnClickedA5()
 {
 	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
-	if (m_board.state == GameBoard::STATE_PLAY && m_board.order == 0 && m_board.board[1][0] != 'O')
+	if (m_board.state == GameBoard::STATE_PLAY && m_board.order == 0 && m_board.board[1][0] == ' ')
 	{
 		GetDlgItem(IDC_A5)->SetWindowTextW(L"X");
 		m_board.DoMove(1, 0);
@@ -856,7 +857,7 @@ void CTicTacToeDlg::OnBnClickedA5()
 void CTicTacToeDlg::OnBnClickedA6()
 {
 	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
-	if (m_board.state == GameBoard::STATE_PLAY && m_board.order == 0 && m_board.board[1][1] != 'O')
+	if (m_board.state == GameBoard::STATE_PLAY && m_board.order == 0 && m_board.board[1][1] == ' ')
 	{
 		GetDlgItem(IDC_A6)->SetWindowTextW(L"X");
 		m_board.DoMove(1, 1);
@@ -880,7 +881,7 @@ void CTicTacToeDlg::OnBnClickedA6()
 void CTicTacToeDlg::OnBnClickedA7()
 {
 	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
-	if (m_board.state == GameBoard::STATE_PLAY && m_board.order == 0 && m_board.board[1][2] != 'O')
+	if (m_board.state == GameBoard::STATE_PLAY && m_board.order == 0 && m_board.board[1][2] == ' ')
 	{
 		GetDlgItem(IDC_A7)->SetWindowTextW(L"X");
 		m_board.DoMove(1, 2);
@@ -904,7 +905,7 @@ void CTicTacToeDlg::OnBnClickedA7()
 void CTicTacToeDlg::OnBnClickedA8()
 {
 	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
-	if (m_board.state == GameBoard::STATE_PLAY && m_board.order == 0 && m_board.board[1][3] != 'O')
+	if (m_board.state == GameBoard::STATE_PLAY && m_board.order == 0 && m_board.board[1][3] == ' ')
 	{
 		GetDlgItem(IDC_A8)->SetWindowTextW(L"X");
 		m_board.DoMove(1, 3);
@@ -928,7 +929,7 @@ void CTicTacToeDlg::OnBnClickedA8()
 void CTicTacToeDlg::OnBnClickedA9()
 {
 	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
-	if (m_board.state == GameBoard::STATE_PLAY && m_board.order == 0 && m_board.board[2][0] != 'O')
+	if (m_board.state == GameBoard::STATE_PLAY && m_board.order == 0 && m_board.board[2][0] == ' ')
 	{
 		GetDlgItem(IDC_A9)->SetWindowTextW(L"X");
 		m_board.DoMove(2, 0);
@@ -952,7 +953,7 @@ void CTicTacToeDlg::OnBnClickedA9()
 void CTicTacToeDlg::OnBnClickedA10()
 {
 	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
-	if (m_board.state == GameBoard::STATE_PLAY && m_board.order == 0 && m_board.board[2][1] != 'O')
+	if (m_board.state == GameBoard::STATE_PLAY && m_board.order == 0 && m_board.board[2][1] == ' ')
 	{
 		GetDlgItem(IDC_A10)->SetWindowTextW(L"X");
 		m_board.DoMove(2, 1);
@@ -976,7 +977,7 @@ void CTicTacToeDlg::OnBnClickedA10()
 void CTicTacToeDlg::OnBnClickedA11()
 {
 	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
-	if (m_board.state == GameBoard::STATE_PLAY && m_board.order == 0 && m_board.board[2][2] != 'O')
+	if (m_board.state == GameBoard::STATE_PLAY && m_board.order == 0 && m_board.board[2][2] == ' ')
 	{
 		GetDlgItem(IDC_A11)->SetWindowTextW(L"X");
 		m_board.DoMove(2, 2);
@@ -1000,7 +1001,7 @@ void CTicTacToeDlg::OnBnClickedA11()
 void CTicTacToeDlg::OnBnClickedA12()
 {
 	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
-	if (m_board.state == GameBoard::STATE_PLAY && m_board.order == 0 && m_board.board[2][3] != 'O')
+	if (m_board.state == GameBoard::STATE_PLAY && m_board.order == 0 && m_board.board[2][3] == ' ')
 	{
 		GetDlgItem(IDC_A12)->SetWindowTextW(L"X");
 		m_board.DoMove(2, 3);
@@ -1024,7 +1025,7 @@ void CTicTacToeDlg::OnBnClickedA12()
 void CTicTacToeDlg::OnBnClickedA13()
 {
 	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
-	if (m_board.state == GameBoard::STATE_PLAY && m_board.order == 0 && m_board.board[3][0] != 'O')
+	if (m_board.state == GameBoard::STATE_PLAY && m_board.order == 0 && m_board.board[3][0] == ' ')
 	{
 		GetDlgItem(IDC_A13)->SetWindowTextW(L"X");
 		m_board.DoMove(3, 0);
@@ -1048,7 +1049,7 @@ void CTicTacToeDlg::OnBnClickedA13()
 void CTicTacToeDlg::OnBnClickedA14()
 {
 	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
-	if (m_board.state == GameBoard::STATE_PLAY && m_board.order == 0 && m_board.board[3][1] != 'O')
+	if (m_board.state == GameBoard::STATE_PLAY && m_board.order == 0 && m_board.board[3][1] == ' ')
 	{
 		GetDlgItem(IDC_A14)->SetWindowTextW(L"X");
 		m_board.DoMove(3, 1);
@@ -1072,7 +1073,7 @@ void CTicTacToeDlg::OnBnClickedA14()
 void CTicTacToeDlg::OnBnClickedA15()
 {
 	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
-	if (m_board.state == GameBoard::STATE_PLAY && m_board.order == 0 && m_board.board[3][2] != 'O')
+	if (m_board.state == GameBoard::STATE_PLAY && m_board.order == 0 && m_board.board[3][2] == ' ')
 	{
 		GetDlgItem(IDC_A15)->SetWindowTextW(L"X");
 		m_board.DoMove(3, 2);
@@ -1096,7 +1097,7 @@ void CTicTacToeDlg::OnBnClickedA15()
 void CTicTacToeDlg::OnBnClickedA16()
 {
 	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
-	if (m_board.state == GameBoard::STATE_PLAY && m_board.order == 0 && m_board.board[3][3] != 'O')
+	if (m_board.state == GameBoard::STATE_PLAY && m_board.order == 0 && m_board.board[3][3] == ' ')
 	{
 		GetDlgItem(IDC_A16)->SetWindowTextW(L"X");
 		m_board.DoMove(3, 3);
