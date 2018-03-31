@@ -360,7 +360,7 @@ void CTicTacToeDlg::StartGame()
 			m_board.order = 0;
 		}
 
-		GetDlgItem(IDC_EDIT_B)->SetWindowTextW(L"<게임 트리>");
+		GetDlgItem(IDC_EDIT_B)->SetWindowTextW(L"게임을 시작합니다.");
 		UpdateGame();  // 게임판을 화면으로 보여주는 함수 호출
 		m_board.state = GameBoard::STATE_PLAY;						/* 보드판 상태를 플레이 중으로 변경 */
 
@@ -668,8 +668,6 @@ void CTicTacToeDlg::SaveGame()
 		}
 		else		/* 제대로 열린 파일이라면 */
 		{
-			int i, j;
-
 			for (int i = 0; i < 4; i++)
 			{
 				for (int j = 0; j < 4; j++)
@@ -744,16 +742,27 @@ void CTicTacToeDlg::LoadGame()
 			m_isLoad = Acnt + Bcnt;  // 게임 로드 여부 저장
 			UpdateGame();  // 게임판 정보를 버튼에 적용
 			// 두 게임 상태창을 초기화
-			GetDlgItem(IDC_EDIT_B)->SetWindowTextW(L"<게임 트리>");
-			fclose(fp);
 
-			if (Acnt > Bcnt)			/* 'X'와 'O' 문자 개수를 비교 */
+			m_board.CheckState();  // 불러온 게임이 이미 종료된 게임인지 확인
+
+			if (m_board.state == GameBoard::STATE_PLAY)
 			{
-				m_board.order = 1;      /* A가 작으면 B가 시작 컴퓨터 */
+				GetDlgItem(IDC_EDIT_B)->SetWindowTextW(L"<게임 트리>");
+				fclose(fp);
+
+				if (Acnt > Bcnt)			/* 'X'와 'O' 문자 개수를 비교 */
+				{
+					m_board.order = 1;      /* A가 작으면 B가 시작 컴퓨터 */
+				}
+				else
+				{
+					m_board.order = 0;          /* 동일하면, A가 시작 컴퓨터 */
+				}
 			}
 			else
 			{
-				m_board.order = 0;          /* 동일하면, A가 시작 컴퓨터 */
+				EndGame();
+				m_isLoad = 0;
 			}
 		}
 	}
