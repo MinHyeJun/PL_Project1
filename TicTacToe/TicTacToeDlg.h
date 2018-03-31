@@ -36,7 +36,7 @@ protected:
 
 public:
 	afx_msg void OnBnClickedButtonStart();
-	afx_msg void OnBnClickedButtonInit();
+	afx_msg void OnBnClickedButtonSave();
 	afx_msg void OnBnClickedButtonLoad();
 	afx_msg void OnBnClickedButtonExit();
 	afx_msg void OnBnClickedButtonUndoA();
@@ -84,4 +84,5 @@ public:
 	afx_msg void OnBnClickedA14();
 	afx_msg void OnBnClickedA15();
 	afx_msg void OnBnClickedA16();
+	void SaveGame();
 };

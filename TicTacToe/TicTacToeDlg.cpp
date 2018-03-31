@@ -67,7 +67,7 @@ BEGIN_MESSAGE_MAP(CTicTacToeDlg, CDialogEx)
 	ON_WM_PAINT()
 	ON_WM_QUERYDRAGICON()
 	ON_BN_CLICKED(IDC_BUTTON_START, &CTicTacToeDlg::OnBnClickedButtonStart)
-	ON_BN_CLICKED(IDC_BUTTON_INIT, &CTicTacToeDlg::OnBnClickedButtonInit)
+	ON_BN_CLICKED(IDC_BUTTON_SAVE, &CTicTacToeDlg::OnBnClickedButtonSave)
 	ON_BN_CLICKED(IDC_BUTTON_LOAD, &CTicTacToeDlg::OnBnClickedButtonLoad)
 	ON_BN_CLICKED(IDC_BUTTON_EXIT, &CTicTacToeDlg::OnBnClickedButtonExit)
 	ON_BN_CLICKED(IDC_BUTTON_UNDO_A, &CTicTacToeDlg::OnBnClickedButtonUndoA)
@@ -227,13 +227,17 @@ void CTicTacToeDlg::OnBnClickedButtonExit()
 	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
 	int conclusion;
 
-	if(m_board.state == GameBoard::STATE_PLAY)  // 현재 게임판 상태가 플레이중이라면 
+	if (m_board.state == GameBoard::STATE_PLAY)  // 현재 게임판 상태가 플레이중이라면 
 	{
-		conclusion = MessageBox(L"현재 게임중입니다.\n게임을 중단 하시겠습니까?", L"게임 중단", MB_OKCANCEL);
-		if(conclusion == IDOK)  // OK 버튼을 눌렀다면 현재 게임판 상태를 멈춤으로 변경
+		conclusion = MessageBox(L"현재 게임중입니다.\n게임을 종료 하시겠습니까?", L"게임 끝내기", MB_OKCANCEL);
+		if (conclusion == IDOK)  // OK 버튼을 눌렀다면 현재 게임판 상태를 멈춤으로 변경
+		{
 			m_board.state = GameBoard::STATE_STOP;
+			exit(0);
+		}
 	}
-	else{  // 현재 게임판 상태가 플레이 중이 아니라면
+	else  // 현재 게임판 상태가 플레이 중이 아니라면
+	{  
 		conclusion = MessageBox(L"게임을 종료 하시겠습니까?", L"게임 종료", MB_OKCANCEL);
 		if(conclusion == IDOK)  // OK 버튼을 눌렀다면 프로그램을 종료함
 			exit(0);
@@ -262,14 +266,26 @@ void CTicTacToeDlg::OnBnClickedButtonUndoA()
 void CTicTacToeDlg::OnBnClickedButtonStart()
 {
 	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
-	StartGame();  // 게임 시작 함수 호출
+	int conclusion;
+
+	if (m_board.state == GameBoard::STATE_PLAY)  // 현재 게임판 상태가 플레이중이라면 
+	{
+		conclusion = MessageBox(L"현재 게임중입니다.\n게임을 다시 시작하시겠습니까?", L"새 게임", MB_OKCANCEL);
+		if (conclusion == IDOK)  // OK 버튼을 눌렀다면 현재 게임판 상태를 멈춤으로 변경
+		{
+			m_board.state = GameBoard::STATE_STOP;
+			StartGame();
+		}
+	}
+	else
+		StartGame();  // 게임 시작 함수 호출
 }
 
 // 초기화 버튼 클릭 시 호출 함수
-void CTicTacToeDlg::OnBnClickedButtonInit()
+void CTicTacToeDlg::OnBnClickedButtonSave()
 {
 	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
-	ResetGame();  // 게임 초기화 함수 호출
+	SaveGame();  // 게임 초기화 함수 호출
 }
 
 // 게임 불러오기 버튼 클릭 시 호출 함수
@@ -344,6 +360,7 @@ void CTicTacToeDlg::StartGame()
 			m_board.order = 0;
 		}
 
+		GetDlgItem(IDC_EDIT_B)->SetWindowTextW(L"<게임 트리>");
 		UpdateGame();  // 게임판을 화면으로 보여주는 함수 호출
 		m_board.state = GameBoard::STATE_PLAY;						/* 보드판 상태를 플레이 중으로 변경 */
 
@@ -633,6 +650,45 @@ void CTicTacToeDlg::UpdateGame()
 		}
 	}
 }
+
+
+void CTicTacToeDlg::SaveGame()
+{
+	CFileDlg dlg;
+
+	if (dlg.DoModal() == IDOK)
+	{
+		FILE *fp;						/* 파일 포인터 선언 */
+		CStringA name(dlg.m_fileStr);
+
+		if (!(fp = fopen(name, "w")))  // 파일을 열 수 없을 때
+		{
+			MessageBox(L"파일을 저장할 수 없습니다! 파일명을 확인하세요.", L"ERROR", MB_ICONERROR);
+			return;
+		}
+		else		/* 제대로 열린 파일이라면 */
+		{
+			int i, j;
+
+			for (int i = 0; i < 4; i++)
+			{
+				for (int j = 0; j < 4; j++)
+				{
+					if (m_board.board[i][j] == 'X')
+						fprintf(fp, "X");
+					else if (m_board.board[i][j] == 'O')
+						fprintf(fp, "O");
+					else
+						fprintf(fp, "B");
+				}
+				fprintf(fp, "\n");
+			}
+			fclose(fp);
+			GetDlgItem(IDC_EDIT_B)->SetWindowTextW(L"게임을 저장했습니다.");
+		}
+	}
+}
+
 
 /**
 	함 수 : LoadGame()
@@ -1116,3 +1172,4 @@ void CTicTacToeDlg::OnBnClickedA16()
 		}
 	}
 }
+
