@@ -38,7 +38,7 @@ public :
 	GameBoard();							/* 게임판 생성자 */
 	GameBoard(const GameBoard& copy);		/* 게임판 클래스 복사 생성자 */	
 	int GetBoardStat();						/* 게임 판 현재 상태 얻기 */
-	void InitBoard(int startCom, int movedCnt, int nlevelA, int nlevelB);	/* 게임판 초기화 */
+	void InitBoard(int startCom, int movedCnt, int nlevelB);	/* 게임판 초기화 */
 	void RandomMove();	/* 랜덤하게 수를 놓을 때 */
 	void DoMove(int x, int y);				/* 좌표를 입력 받아 수를 놓을 때 */
 	void UndoMove();						/* 놓았던 수 무르기 */

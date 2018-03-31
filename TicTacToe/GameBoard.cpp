@@ -68,19 +68,19 @@ int GameBoard::GetBoardStat()
 	함 수 : InitBoard(int startCom, int movedCnt, int nlevelA, int nlevelB)
 	기 능 : 초기화에 필요한 정보를 인자를 중심으로 게임판을 초기화해주는 함수
 */
-void GameBoard::InitBoard(int startCom, int movedCnt, int nlevelA, int nlevelB)
+void GameBoard::InitBoard(int startCom, int movedCnt, int nlevelB)
 {
 	moveCnt = movedCnt;		/* 몇번 째 수를 저장 */
 
 	if(startCom == 0)		/* 시작 컴퓨터와 컴퓨터 레벨을 설정, 시작 컴퓨터가 A인 경우 */
 	{	
 		starterCom = 'X';		oppnentCom = 'O';
-		startLevel = nlevelA;	oppLevel = nlevelB;			
+		startLevel = 0;	        oppLevel = nlevelB;			
 	}
 	else  // 시작 컴퓨터가 B인 경우		
 	{
 		starterCom = 'O';		oppnentCom = 'X';
-		startLevel = nlevelB;	oppLevel = nlevelA;
+		startLevel = nlevelB;	oppLevel = 0;
 	}
 
 	if(movedCnt == 0)		/* 불러온 게임인지 여부를 검사해서 보드판 초기화 */

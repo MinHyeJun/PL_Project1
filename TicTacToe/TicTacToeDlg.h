@@ -40,13 +40,11 @@ public:
 	afx_msg void OnBnClickedButtonLoad();
 	afx_msg void OnBnClickedButtonExit();
 	afx_msg void OnBnClickedButtonUndoA();
-	afx_msg void OnBnClickedButtonUndoB();
 	virtual BOOL PreTranslateMessage(MSG* pMsg);	
 	afx_msg HBRUSH OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor);
 	HACCEL m_hAccelTable;
 	CButton m_undoA;  // 컴퓨터 A의 무르기 버튼
-	CComboBox m_comboA;  // 컴퓨터 A의 레벨 선택 콤보박스
-	CComboBox m_comboB;  // 컴퓨터 B의 레벨 선택 콤보바가스
+	CComboBox m_comboB;  // 컴퓨터 B의 레벨 선택 콤보박스
 	CEdit m_listB;  // 컴퓨터 B의 상태창
 	HBRUSH m_BKColor;
 
@@ -65,7 +63,6 @@ public:
 	/*	사용자 지정 변수 */
 
 	GameBoard m_board;		/* 게임 보드 변수 */
-	int m_levelA;			/* 컴퓨터 A의 LA-level */
 	int m_levelB;			/* 컴퓨터 B의 LA-level */
 	int m_startCom;			/* 시작하는 COM 종류 */
 	int m_isLoad;			/* 게임이 로드 된 건지 구분 */

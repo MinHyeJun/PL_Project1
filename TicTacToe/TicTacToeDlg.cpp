@@ -58,7 +58,6 @@ void CTicTacToeDlg::DoDataExchange(CDataExchange* pDX)
 {
 	CDialogEx::DoDataExchange(pDX);
 	DDX_Control(pDX, IDC_BUTTON_UNDO_A, m_undoA);
-	DDX_Control(pDX, IDC_COMBO_A, m_comboA);
 	DDX_Control(pDX, IDC_COMBO_B, m_comboB);
 	DDX_Control(pDX, IDC_EDIT_B, m_listB);
 }
@@ -245,14 +244,18 @@ void CTicTacToeDlg::OnBnClickedButtonExit()
 void CTicTacToeDlg::OnBnClickedButtonUndoA()
 {
 	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
-	m_checkUndo = 1;  // 무르기 상태 True
-}
+	m_board.UndoMove();
+	m_board.UndoMove();
 
-// 컴퓨터 B의 한 수를 무르기 버튼 클릭 시 호출 함수
-void CTicTacToeDlg::OnBnClickedButtonUndoB()
-{
-	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
-	m_checkUndo = 1;  // 무르기 상태 True
+	m_board.order = 1;
+	UpdateGame();
+	m_board.order = 0;
+	UpdateGame();
+
+	GetDlgItem(IDC_EDIT_B)->SetWindowTextW(L"한 수 무르기를 사용하였습니다.");
+
+	if (m_board.moveCnt < 2)
+		m_undoA.EnableWindow(false);
 }
 
 // 게임 시작 버튼 클릭 시 호출 함수
@@ -281,22 +284,14 @@ int CTicTacToeDlg::CheckReady()
 {
 	UpdateData(TRUE);
 
-	int level_a = m_comboA.GetCurSel();  // 컴퓨터 A의 선택된 레벨 정보 가져오기
 	int level_b = m_comboB.GetCurSel();  // 컴퓨터 B의 선택된 레벨 정보 가져오기
 
-	if(level_a == -1 || level_b == -1)  // 두 컴퓨터 중 하나라도 레벨이 선택되지 않았다면
+	if(level_b == -1)  // 두 컴퓨터 중 하나라도 레벨이 선택되지 않았다면
 		return -1;  // 레벨 선택이 되어 있지 않음: -1
 	else if(m_startCom == -1)  // 선공 컴퓨터가 선택되지 않았다면
 		return 0;  // 선공 컴퓨터가 선택되지 않음: 0
 	else
 	{
-		switch(level_a)  // 선택된 레벨 정보에 따라 컴퓨터 A의 레벨 셋팅
-		{
-		case 0 : m_levelA = 2; break;			
-		case 1 : m_levelA = 4; break;			
-		
-		}
-
 		switch(level_b)  // 선택된 레벨 정보에 따라 컴퓨터 B의 레벨 셋팅
 		{
 		case 0 : m_levelB = 3; break;			
@@ -313,10 +308,6 @@ void CTicTacToeDlg::SetGame()
 {
 	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
 
-	// 컴퓨터 A의 evaluate 레벨 선택 콤보박스에 레벨 셋팅
-	m_comboA.AddString(L"Level 2");
-	m_comboA.AddString(L"Level 4");
-
 	// 컴퓨터 B의 evaluate 레벨 선택 콤보박스에 레벨 셋팅
 	m_comboB.AddString(L"Level 3");
 	m_comboB.AddString(L"Level 5");
@@ -325,7 +316,6 @@ void CTicTacToeDlg::SetGame()
 	GetDlgItem(IDC_EDIT_B)->SetWindowTextW(L"<게임 트리>");
 
 	// 두 컴퓨터의 evaluate 레벨 초기화
-	m_levelA = 0;
 	m_levelB = 0;
 }
 
@@ -345,12 +335,12 @@ void CTicTacToeDlg::StartGame()
 	{
 		if(m_isLoad!=0)			/* 불러온 게임이라면, */
 		{						/* 불러온 게임 정보로 보드판 초기화 */
-			m_board.InitBoard(m_startCom, m_isLoad, m_levelA, m_levelB);	
+			m_board.InitBoard(m_startCom, m_isLoad, m_levelB);	
 			m_isLoad = 0;  // 게임 로드상태 초기화(다음 불러오기를 위해)
 		}
 		else
 		{
-			m_board.InitBoard(m_startCom, 0, m_levelA, m_levelB);	/* 아니라면, 새로운 판으로 초기화 */
+			m_board.InitBoard(m_startCom, 0, m_levelB);	/* 아니라면, 새로운 판으로 초기화 */
 			m_board.order = 0;
 		}
 
@@ -458,7 +448,7 @@ void CTicTacToeDlg::ResetGame()
 	UpdateData(FALSE);
 
 	m_board.state = GameBoard::STATE_INIT;  // 게임 상태를 초기화로 지정
-	m_board.InitBoard(m_startCom, 0, m_levelA, m_levelB);  // 게임 보드판 상태를 초기화
+	m_board.InitBoard(m_startCom, 0, m_levelB);  // 게임 보드판 상태를 초기화
 
 	// 게임보드판 버튼을 O,X에서 다시 숫자로 변경
 	for(int i=0; i<4; i++)
@@ -477,7 +467,6 @@ void CTicTacToeDlg::ResetGame()
 	// 한 수 무르기 버튼의 접근을 false로 변경
 	m_undoA.EnableWindow(FALSE);
 	// 레벨 선택 콤보박스의 텍스트들을 모두 초기화
-	m_comboA.SetCurSel(-1);
 	m_comboB.SetCurSel(-1);
 }
 
