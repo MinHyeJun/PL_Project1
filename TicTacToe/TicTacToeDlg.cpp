@@ -233,7 +233,7 @@ void CTicTacToeDlg::OnBnClickedButtonExit()
 		if (conclusion == IDOK)  // OK 버튼을 눌렀다면 현재 게임판 상태를 멈춤으로 변경
 		{
 			m_board.state = GameBoard::STATE_STOP;
-			exit(0);
+			AfxGetMainWnd()->PostMessageW(WM_QUIT);
 		}
 	}
 	else  // 현재 게임판 상태가 플레이 중이 아니라면
