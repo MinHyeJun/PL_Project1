@@ -76,6 +76,10 @@ BEGIN_MESSAGE_MAP(CTicTacToeDlg, CDialogEx)
 	ON_BN_CLICKED(IDC_BUTTON_UNDO_A, &CTicTacToeDlg::OnBnClickedButtonUndoA)
 	ON_BN_CLICKED(IDC_BUTTON_UNDO_B, &CTicTacToeDlg::OnBnClickedButtonUndoB)
 	ON_WM_CTLCOLOR()
+	ON_BN_CLICKED(IDC_A1, &CTicTacToeDlg::OnBnClickedA1)
+	ON_BN_CLICKED(IDC_A2, &CTicTacToeDlg::OnBnClickedA2)
+	ON_BN_CLICKED(IDC_A3, &CTicTacToeDlg::OnBnClickedA3)
+	ON_BN_CLICKED(IDC_A4, &CTicTacToeDlg::OnBnClickedA4)
 END_MESSAGE_MAP()
 
 
@@ -342,33 +346,8 @@ void CTicTacToeDlg::StartGame()
 
 		UpdateGame();  // 게임판을 화면으로 보여주는 함수 호출
 		m_board.state = GameBoard::STATE_PLAY;						/* 보드판 상태를 플레이 중으로 변경 */
+		m_board.order = 0;
 
- 		while(m_board.state == GameBoard::STATE_PLAY)		/* 게임 중이라면 */
-		{
-			TicTacToeAI* tttAI = new TicTacToeAI(m_board);	/* 새로운 AI 객체를 생성 */
-
-			tttAI->GetBestMove();							/* 최적의 좌표를 구함 */
-			m_board.DoMove(tttAI->bestX, tttAI->bestY);		/* 해당 좌표에 수를 둠 */
-			
-			Node* node = tttAI->GetRootNode();			/* 최적의 좌표를 구하는동안 저장한 트리 중 루트노드 반환 */
-			this->PrintTreeNode(node);					/* 트리 출력 */
-			
-			UpdateGame();							/* 게임판 업데이트 */
-		
-			while(WaitUndo())							/* 무르기 기다림 */
-			{
-				m_board.RandomMove();	/* 남아있는 좌표중 랜덤한 곳으로 수를 둠 */
-				UpdateGame();						/* 게임판 업데이트 */
-			}
-
-			delete tttAI;  // 위에서 생성한 AI 객체 반환
-			delete node;  // 위에서 생성한 node 객체 반환
-
-			m_board.CheckState();			/* 게임판 상태를 점검 */
-			if(m_board.state != GameBoard::STATE_PLAY)
-				EndGame();					/* 플레이 중이 아닌 상태면 게임 종료 */
-		}
-		UpdateGame();	/* 상대방 보드판에도 출력 */
 	}
 	else if(checkErr == -1)	/* 레벨 설정이 안되어있을때 오류 출력 */
 	{
@@ -605,7 +584,7 @@ void CTicTacToeDlg::UpdateGame()
 	CString str;
 	
 	// 게임판 정보를 화면에 업데이트할 컴퓨터의 게임판 버튼의 첫번째 버튼 아이디정보를 얻어옴
-	if(m_board.moveCnt % 2 == 1)  // 놓여진 수가 홀수일 때(선공 차례일 때)
+	if(m_board.order == 0)  // 놓여진 수가 홀수일 때(선공 차례일 때)
 	{
 		if(m_board.starterCom == 'X')  // 시작한 컴퓨터가 X(컴퓨터 A)라면
 			comButton = IDC_A1;
@@ -731,6 +710,132 @@ void CTicTacToeDlg::LoadGame()
 			GetDlgItem(IDC_EDIT_A)->SetWindowTextW(L"<게임 트리>");
 			GetDlgItem(IDC_EDIT_B)->SetWindowTextW(L"<게임 트리>");
 			fclose(fp);
+		}
+	}
+}
+
+void CTicTacToeDlg::PlayAI()
+{
+	m_undoA.EnableWindow(false);
+
+	TicTacToeAI* tttAI = new TicTacToeAI(m_board);	/* 새로운 AI 객체를 생성 */
+
+	tttAI->GetBestMove();							/* 최적의 좌표를 구함 */
+	m_board.DoMove(tttAI->bestX, tttAI->bestY);		/* 해당 좌표에 수를 둠 */
+
+	Node* node = tttAI->GetRootNode();			/* 최적의 좌표를 구하는동안 저장한 트리 중 루트노드 반환 */
+	this->PrintTreeNode(node);					/* 트리 출력 */
+
+	UpdateGame();							/* 게임판 업데이트 */
+
+	delete tttAI;  // 위에서 생성한 AI 객체 반환
+	delete node;  // 위에서 생성한 node 객체 반환
+
+	m_board.CheckState();			/* 게임판 상태를 점검 */
+	if (m_board.state != GameBoard::STATE_PLAY)
+	{
+		EndGame();					/* 플레이 중이 아닌 상태면 게임 종료 */
+		UpdateGame();	/* 상대방 보드판에도 출력 */
+	}
+	else
+	{
+		m_board.order = 0;
+		UpdateGame();
+		m_undoA.EnableWindow(true);
+	}
+}
+
+
+void CTicTacToeDlg::OnBnClickedA1()
+{
+	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
+	if (m_board.state == GameBoard::STATE_PLAY && m_board.order == 0 && m_board.board[0][0] != 'O')
+	{
+		GetDlgItem(IDC_A1)->SetWindowTextW(L"X");
+		m_board.DoMove(0, 0);
+		UpdateGame();
+
+		m_board.CheckState();			/* 게임판 상태를 점검 */
+		if (m_board.state != GameBoard::STATE_PLAY)
+		{
+			EndGame();					/* 플레이 중이 아닌 상태면 게임 종료 */
+			UpdateGame();	/* 상대방 보드판에도 출력 */
+		}
+		else
+		{
+			m_board.order = 1;
+			PlayAI();
+		}
+	}
+}
+
+void CTicTacToeDlg::OnBnClickedA2()
+{
+	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
+	if (m_board.state == GameBoard::STATE_PLAY && m_board.order == 0 && m_board.board[0][1] != 'O')
+	{
+		GetDlgItem(IDC_A2)->SetWindowTextW(L"X");
+		m_board.DoMove(0, 1);
+		UpdateGame();
+
+		m_board.CheckState();			/* 게임판 상태를 점검 */
+		if (m_board.state != GameBoard::STATE_PLAY)
+		{
+			EndGame();					/* 플레이 중이 아닌 상태면 게임 종료 */
+			UpdateGame();	/* 상대방 보드판에도 출력 */
+		}
+		else
+		{
+			m_board.order = 1;
+			PlayAI();
+		}
+	}
+}
+
+
+void CTicTacToeDlg::OnBnClickedA3()
+{
+	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
+	if (m_board.state == GameBoard::STATE_PLAY && m_board.order == 0 && m_board.board[0][2] != 'O')
+	{
+		GetDlgItem(IDC_A3)->SetWindowTextW(L"X");
+		m_board.DoMove(0, 2);
+		UpdateGame();
+
+		m_board.CheckState();			/* 게임판 상태를 점검 */
+		if (m_board.state != GameBoard::STATE_PLAY)
+		{
+			EndGame();					/* 플레이 중이 아닌 상태면 게임 종료 */
+			UpdateGame();	/* 상대방 보드판에도 출력 */
+		}
+		else
+		{
+			m_board.order = 1;
+			PlayAI();
+		}
+	}
+}
+
+
+void CTicTacToeDlg::OnBnClickedA4()
+{
+	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
+	if (m_board.state == GameBoard::STATE_PLAY && m_board.order == 0 && m_board.board[0][3] != 'O')
+	{
+		GetDlgItem(IDC_A4)->SetWindowTextW(L"X");
+		m_board.DoMove(0, 3);
+		UpdateGame();
+
+		m_board.CheckState();			/* 게임판 상태를 점검 */
+		if (m_board.state != GameBoard::STATE_PLAY)
+		{
+			EndGame();					/* 플레이 중이 아닌 상태면 게임 종료 */
+			UpdateGame();	/* 상대방 보드판에도 출력 */
+		}
+		else
+		{
+			m_board.order = 1;
+			PlayAI();
 		}
 	}
 }

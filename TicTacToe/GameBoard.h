@@ -24,6 +24,7 @@ public :
 	int	oppLevel;			/* 상대방 컴퓨터 레벨 */
 	char starterCom;		/* 게임을 시작한 컴퓨터 종류 */
 	char oppnentCom;		/* 상대방 컴퓨터 종류 */
+	int order;  // 수를 놓는 플레이어 순서
 
 	static const int STATE_WINA = 3;		/* 컴퓨터A가 이겼을 때 */
 	static const int STATE_WINB = 4;		/* 컴퓨터B가 이겼을 때 */
