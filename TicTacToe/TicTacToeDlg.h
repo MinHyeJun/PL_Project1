@@ -45,10 +45,8 @@ public:
 	afx_msg HBRUSH OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor);
 	HACCEL m_hAccelTable;
 	CButton m_undoA;  // 컴퓨터 A의 무르기 버튼
-	CButton m_undoB;  // 컴퓨터 B의 무르기 버튼
 	CComboBox m_comboA;  // 컴퓨터 A의 레벨 선택 콤보박스
 	CComboBox m_comboB;  // 컴퓨터 B의 레벨 선택 콤보바가스
-	CEdit m_listA;  // 컴퓨터 A의 상태창
 	CEdit m_listB;  // 컴퓨터 B의 상태창
 	HBRUSH m_BKColor;
 
@@ -77,4 +75,16 @@ public:
 	afx_msg void OnBnClickedA2();
 	afx_msg void OnBnClickedA3();
 	afx_msg void OnBnClickedA4();
+	afx_msg void OnBnClickedA5();
+	afx_msg void OnBnClickedA6();
+	afx_msg void OnBnClickedA7();
+	afx_msg void OnBnClickedA8();
+	afx_msg void OnBnClickedA9();
+	afx_msg void OnBnClickedA10();
+	afx_msg void OnBnClickedA11();
+	afx_msg void OnBnClickedA12();
+	afx_msg void OnBnClickedA13();
+	afx_msg void OnBnClickedA14();
+	afx_msg void OnBnClickedA15();
+	afx_msg void OnBnClickedA16();
 };

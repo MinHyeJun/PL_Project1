@@ -58,10 +58,8 @@ void CTicTacToeDlg::DoDataExchange(CDataExchange* pDX)
 {
 	CDialogEx::DoDataExchange(pDX);
 	DDX_Control(pDX, IDC_BUTTON_UNDO_A, m_undoA);
-	DDX_Control(pDX, IDC_BUTTON_UNDO_B, m_undoB);
 	DDX_Control(pDX, IDC_COMBO_A, m_comboA);
 	DDX_Control(pDX, IDC_COMBO_B, m_comboB);
-	DDX_Control(pDX, IDC_EDIT_A, m_listA);
 	DDX_Control(pDX, IDC_EDIT_B, m_listB);
 }
 
@@ -74,12 +72,23 @@ BEGIN_MESSAGE_MAP(CTicTacToeDlg, CDialogEx)
 	ON_BN_CLICKED(IDC_BUTTON_LOAD, &CTicTacToeDlg::OnBnClickedButtonLoad)
 	ON_BN_CLICKED(IDC_BUTTON_EXIT, &CTicTacToeDlg::OnBnClickedButtonExit)
 	ON_BN_CLICKED(IDC_BUTTON_UNDO_A, &CTicTacToeDlg::OnBnClickedButtonUndoA)
-	ON_BN_CLICKED(IDC_BUTTON_UNDO_B, &CTicTacToeDlg::OnBnClickedButtonUndoB)
 	ON_WM_CTLCOLOR()
 	ON_BN_CLICKED(IDC_A1, &CTicTacToeDlg::OnBnClickedA1)
 	ON_BN_CLICKED(IDC_A2, &CTicTacToeDlg::OnBnClickedA2)
 	ON_BN_CLICKED(IDC_A3, &CTicTacToeDlg::OnBnClickedA3)
 	ON_BN_CLICKED(IDC_A4, &CTicTacToeDlg::OnBnClickedA4)
+	ON_BN_CLICKED(IDC_A5, &CTicTacToeDlg::OnBnClickedA5)
+	ON_BN_CLICKED(IDC_A6, &CTicTacToeDlg::OnBnClickedA6)
+	ON_BN_CLICKED(IDC_A7, &CTicTacToeDlg::OnBnClickedA7)
+	ON_BN_CLICKED(IDC_A8, &CTicTacToeDlg::OnBnClickedA8)
+	ON_BN_CLICKED(IDC_A9, &CTicTacToeDlg::OnBnClickedA9)
+	ON_BN_CLICKED(IDC_A10, &CTicTacToeDlg::OnBnClickedA10)
+	ON_BN_CLICKED(IDC_A11, &CTicTacToeDlg::OnBnClickedA11)
+	ON_BN_CLICKED(IDC_A12, &CTicTacToeDlg::OnBnClickedA12)
+	ON_BN_CLICKED(IDC_A13, &CTicTacToeDlg::OnBnClickedA13)
+	ON_BN_CLICKED(IDC_A14, &CTicTacToeDlg::OnBnClickedA14)
+	ON_BN_CLICKED(IDC_A15, &CTicTacToeDlg::OnBnClickedA15)
+	ON_BN_CLICKED(IDC_A16, &CTicTacToeDlg::OnBnClickedA16)
 END_MESSAGE_MAP()
 
 
@@ -118,7 +127,6 @@ BOOL CTicTacToeDlg::OnInitDialog()
 	m_hAccelTable = ::LoadAccelerators(AfxGetInstanceHandle(), MAKEINTRESOURCE(IDR_ACCELERATOR1));
 
 	GetDlgItem(IDC_BUTTON_UNDO_A)->EnableWindow(false);  // 한 수 무르기 버튼의 접근을 false로 변경
-	GetDlgItem(IDC_BUTTON_UNDO_B)->EnableWindow(false);
 	m_BKColor = CreateSolidBrush(RGB(255, 255, 255));
 
 	m_isLoad = 0;  // 게임 로드 여부 초기화
@@ -314,7 +322,6 @@ void CTicTacToeDlg::SetGame()
 	m_comboB.AddString(L"Level 5");
 
 	// 두 컴퓨터의 상태창에 초기 텍스트를 셋팅
-	GetDlgItem(IDC_EDIT_A)->SetWindowTextW(L"<게임 트리>");
 	GetDlgItem(IDC_EDIT_B)->SetWindowTextW(L"<게임 트리>");
 
 	// 두 컴퓨터의 evaluate 레벨 초기화
@@ -342,12 +349,16 @@ void CTicTacToeDlg::StartGame()
 			m_isLoad = 0;  // 게임 로드상태 초기화(다음 불러오기를 위해)
 		}
 		else
+		{
 			m_board.InitBoard(m_startCom, 0, m_levelA, m_levelB);	/* 아니라면, 새로운 판으로 초기화 */
+			m_board.order = 0;
+		}
 
 		UpdateGame();  // 게임판을 화면으로 보여주는 함수 호출
 		m_board.state = GameBoard::STATE_PLAY;						/* 보드판 상태를 플레이 중으로 변경 */
-		m_board.order = 0;
 
+		if(m_board.order == 1)
+			PlayAI();
 	}
 	else if(checkErr == -1)	/* 레벨 설정이 안되어있을때 오류 출력 */
 	{
@@ -412,12 +423,10 @@ void CTicTacToeDlg::PrintTreeNode(Node* root)
 	{
 		if(m_board.starterCom == 'X')  // 시작한 컴퓨터가 X(컴퓨터 A)라면
 		{
-			GetDlgItem(IDC_EDIT_A)->SetWindowTextW(temp);
 			GetDlgItem(IDC_EDIT_B)->SetWindowTextW(L"<게임 트리>");
 		}	
 		else  // 시작한 컴퓨터가 O(컴퓨터 B)라면
 		{
-			GetDlgItem(IDC_EDIT_A)->SetWindowTextW(L"<게임 트리>");
 			GetDlgItem(IDC_EDIT_B)->SetWindowTextW(temp);
 		}
 	}
@@ -426,12 +435,10 @@ void CTicTacToeDlg::PrintTreeNode(Node* root)
 		if(m_board.starterCom == 'X')  // 시작한 컴퓨터가 X(컴퓨터 A)라면
 		{
 			GetDlgItem(IDC_EDIT_B)->SetWindowTextW(temp);
-			GetDlgItem(IDC_EDIT_A)->SetWindowTextW(L"<게임 트리>");
 		}	
 		else  // 시작한 컴퓨터가 O(컴퓨터 B)라면
 		{
 			GetDlgItem(IDC_EDIT_B)->SetWindowTextW(L"<게임 트리>");
-			GetDlgItem(IDC_EDIT_A)->SetWindowTextW(temp);
 		}
 	}
 }
@@ -447,6 +454,7 @@ void CTicTacToeDlg::ResetGame()
 	int count = 0;  // 게임 보드판의 버튼을 숫자로 바꾸기 위해 숫자를 담는 변수
 
 	m_startCom = 0;  // 시작한 컴퓨터 종류 초기화
+	m_board.order = 0;
 	UpdateData(FALSE);
 
 	m_board.state = GameBoard::STATE_INIT;  // 게임 상태를 초기화로 지정
@@ -465,11 +473,9 @@ void CTicTacToeDlg::ResetGame()
 	}
 
 	// 게임 상태창 초기화
-	GetDlgItem(IDC_EDIT_A)->SetWindowTextW(L"<게임 트리>");
 	GetDlgItem(IDC_EDIT_B)->SetWindowTextW(L"<게임 트리>");
 	// 한 수 무르기 버튼의 접근을 false로 변경
 	m_undoA.EnableWindow(FALSE);
-	m_undoB.EnableWindow(FALSE);
 	// 레벨 선택 콤보박스의 텍스트들을 모두 초기화
 	m_comboA.SetCurSel(-1);
 	m_comboB.SetCurSel(-1);
@@ -485,33 +491,27 @@ void CTicTacToeDlg::EndGame()
 	switch(m_board.state)  // 게임의 상태를 체크하여 결과를 출력
 	{
 	case GameBoard::STATE_WINA :  // 컴퓨터 A가 이긴 경우
-		GetDlgItem(IDC_EDIT_A)->SetWindowTextW(L"게임에 이겼습니다.");
-		GetDlgItem(IDC_EDIT_B)->SetWindowTextW(L"게임에 졌습니다.");
+		GetDlgItem(IDC_EDIT_B)->SetWindowTextW(L"게임에 이겼습니다.");
 		break;
 
 	case GameBoard::STATE_WINB :  // 컴퓨터 B가 이긴 경우
-		GetDlgItem(IDC_EDIT_A)->SetWindowTextW(L"게임에 졌습니다.");
-		GetDlgItem(IDC_EDIT_B)->SetWindowTextW(L"게임에 이겼습니다.");
+		GetDlgItem(IDC_EDIT_B)->SetWindowTextW(L"게임에 졌습니다.");
 		break;
 		
 	case GameBoard::STATE_DRAW :  // 비긴 경우
-		GetDlgItem(IDC_EDIT_A)->SetWindowTextW(L"게임에 비겼습니다.");
 		GetDlgItem(IDC_EDIT_B)->SetWindowTextW(L"게임에 비겼습니다.");
 		break;
 
 	case GameBoard::STATE_INIT :  // 게임을 초기화 한 경우
-		GetDlgItem(IDC_EDIT_A)->SetWindowTextW(L"<게임 트리>");
 		GetDlgItem(IDC_EDIT_B)->SetWindowTextW(L"<게임 트리>");
 		break;
 	
 	case GameBoard::STATE_STOP :  // 게임을 중단한 경우
-		GetDlgItem(IDC_EDIT_A)->SetWindowTextW(L"게임이 중단됬습니다.");
 		GetDlgItem(IDC_EDIT_B)->SetWindowTextW(L"게임이 중단됬습니다.");
 		break;		
 	}
 	// 게임이 끝났으므로 한 수 무르기 버튼의 접근을 False로 변경
 	m_undoA.EnableWindow(FALSE);
-	m_undoB.EnableWindow(FALSE);
 }
 
 /**
@@ -532,12 +532,10 @@ int CTicTacToeDlg::WaitUndo()
 		if(m_board.starterCom == 'X')  // 시작한 컴퓨터가 X(컴퓨터 A)라면
 		{
 			m_undoA.EnableWindow(TRUE);
-			m_undoB.EnableWindow(FALSE);
 		}
 		else  // 시작한 컴퓨터가 O(컴퓨터 B)라면
 		{
 			m_undoA.EnableWindow(FALSE);
-			m_undoB.EnableWindow(TRUE);
 		}
 	}
 	else   // 놓여진 수가 짝수일 때(후공 차례일 때)
@@ -545,12 +543,10 @@ int CTicTacToeDlg::WaitUndo()
 		if(m_board.starterCom == 'X')  // 시작한 컴퓨터가 X(컴퓨터 A)라면
 		{
 			m_undoA.EnableWindow(FALSE);
-			m_undoB.EnableWindow(TRUE);
 		}
 		else  // 시작한 컴퓨터가 O(컴퓨터 B)라면
 		{
 			m_undoA.EnableWindow(TRUE);
-			m_undoB.EnableWindow(FALSE);
 		}
 	}
 
@@ -698,18 +694,21 @@ void CTicTacToeDlg::LoadGame()
 				}
 			}
 
-			if(Acnt < Bcnt)			/* 'X'와 'O' 문자 개수를 비교 */
-				m_startCom = 1;		/* A가 작으면 B가 시작 컴퓨터 */
-			else					/* 동일하면, A가 시작 컴퓨터 */
-				m_startCom = 0;
-
 			UpdateData(FALSE);
 			m_isLoad = Acnt + Bcnt;  // 게임 로드 여부 저장
 			UpdateGame();  // 게임판 정보를 버튼에 적용
 			// 두 게임 상태창을 초기화
-			GetDlgItem(IDC_EDIT_A)->SetWindowTextW(L"<게임 트리>");
 			GetDlgItem(IDC_EDIT_B)->SetWindowTextW(L"<게임 트리>");
 			fclose(fp);
+
+			if (Acnt > Bcnt)			/* 'X'와 'O' 문자 개수를 비교 */
+			{
+				m_board.order = 1;      /* A가 작으면 B가 시작 컴퓨터 */
+			}
+			else
+			{
+				m_board.order = 0;          /* 동일하면, A가 시작 컴퓨터 */
+			}
 		}
 	}
 }
@@ -824,6 +823,294 @@ void CTicTacToeDlg::OnBnClickedA4()
 	{
 		GetDlgItem(IDC_A4)->SetWindowTextW(L"X");
 		m_board.DoMove(0, 3);
+		UpdateGame();
+
+		m_board.CheckState();			/* 게임판 상태를 점검 */
+		if (m_board.state != GameBoard::STATE_PLAY)
+		{
+			EndGame();					/* 플레이 중이 아닌 상태면 게임 종료 */
+			UpdateGame();	/* 상대방 보드판에도 출력 */
+		}
+		else
+		{
+			m_board.order = 1;
+			PlayAI();
+		}
+	}
+}
+
+
+void CTicTacToeDlg::OnBnClickedA5()
+{
+	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
+	if (m_board.state == GameBoard::STATE_PLAY && m_board.order == 0 && m_board.board[1][0] != 'O')
+	{
+		GetDlgItem(IDC_A5)->SetWindowTextW(L"X");
+		m_board.DoMove(1, 0);
+		UpdateGame();
+
+		m_board.CheckState();			/* 게임판 상태를 점검 */
+		if (m_board.state != GameBoard::STATE_PLAY)
+		{
+			EndGame();					/* 플레이 중이 아닌 상태면 게임 종료 */
+			UpdateGame();	/* 상대방 보드판에도 출력 */
+		}
+		else
+		{
+			m_board.order = 1;
+			PlayAI();
+		}
+	}
+}
+
+
+void CTicTacToeDlg::OnBnClickedA6()
+{
+	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
+	if (m_board.state == GameBoard::STATE_PLAY && m_board.order == 0 && m_board.board[1][1] != 'O')
+	{
+		GetDlgItem(IDC_A6)->SetWindowTextW(L"X");
+		m_board.DoMove(1, 1);
+		UpdateGame();
+
+		m_board.CheckState();			/* 게임판 상태를 점검 */
+		if (m_board.state != GameBoard::STATE_PLAY)
+		{
+			EndGame();					/* 플레이 중이 아닌 상태면 게임 종료 */
+			UpdateGame();	/* 상대방 보드판에도 출력 */
+		}
+		else
+		{
+			m_board.order = 1;
+			PlayAI();
+		}
+	}
+}
+
+
+void CTicTacToeDlg::OnBnClickedA7()
+{
+	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
+	if (m_board.state == GameBoard::STATE_PLAY && m_board.order == 0 && m_board.board[1][2] != 'O')
+	{
+		GetDlgItem(IDC_A7)->SetWindowTextW(L"X");
+		m_board.DoMove(1, 2);
+		UpdateGame();
+
+		m_board.CheckState();			/* 게임판 상태를 점검 */
+		if (m_board.state != GameBoard::STATE_PLAY)
+		{
+			EndGame();					/* 플레이 중이 아닌 상태면 게임 종료 */
+			UpdateGame();	/* 상대방 보드판에도 출력 */
+		}
+		else
+		{
+			m_board.order = 1;
+			PlayAI();
+		}
+	}
+}
+
+
+void CTicTacToeDlg::OnBnClickedA8()
+{
+	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
+	if (m_board.state == GameBoard::STATE_PLAY && m_board.order == 0 && m_board.board[1][3] != 'O')
+	{
+		GetDlgItem(IDC_A8)->SetWindowTextW(L"X");
+		m_board.DoMove(1, 3);
+		UpdateGame();
+
+		m_board.CheckState();			/* 게임판 상태를 점검 */
+		if (m_board.state != GameBoard::STATE_PLAY)
+		{
+			EndGame();					/* 플레이 중이 아닌 상태면 게임 종료 */
+			UpdateGame();	/* 상대방 보드판에도 출력 */
+		}
+		else
+		{
+			m_board.order = 1;
+			PlayAI();
+		}
+	}
+}
+
+
+void CTicTacToeDlg::OnBnClickedA9()
+{
+	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
+	if (m_board.state == GameBoard::STATE_PLAY && m_board.order == 0 && m_board.board[2][0] != 'O')
+	{
+		GetDlgItem(IDC_A9)->SetWindowTextW(L"X");
+		m_board.DoMove(2, 0);
+		UpdateGame();
+
+		m_board.CheckState();			/* 게임판 상태를 점검 */
+		if (m_board.state != GameBoard::STATE_PLAY)
+		{
+			EndGame();					/* 플레이 중이 아닌 상태면 게임 종료 */
+			UpdateGame();	/* 상대방 보드판에도 출력 */
+		}
+		else
+		{
+			m_board.order = 1;
+			PlayAI();
+		}
+	}
+}
+
+
+void CTicTacToeDlg::OnBnClickedA10()
+{
+	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
+	if (m_board.state == GameBoard::STATE_PLAY && m_board.order == 0 && m_board.board[2][1] != 'O')
+	{
+		GetDlgItem(IDC_A10)->SetWindowTextW(L"X");
+		m_board.DoMove(2, 1);
+		UpdateGame();
+
+		m_board.CheckState();			/* 게임판 상태를 점검 */
+		if (m_board.state != GameBoard::STATE_PLAY)
+		{
+			EndGame();					/* 플레이 중이 아닌 상태면 게임 종료 */
+			UpdateGame();	/* 상대방 보드판에도 출력 */
+		}
+		else
+		{
+			m_board.order = 1;
+			PlayAI();
+		}
+	}
+}
+
+
+void CTicTacToeDlg::OnBnClickedA11()
+{
+	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
+	if (m_board.state == GameBoard::STATE_PLAY && m_board.order == 0 && m_board.board[2][2] != 'O')
+	{
+		GetDlgItem(IDC_A11)->SetWindowTextW(L"X");
+		m_board.DoMove(2, 2);
+		UpdateGame();
+
+		m_board.CheckState();			/* 게임판 상태를 점검 */
+		if (m_board.state != GameBoard::STATE_PLAY)
+		{
+			EndGame();					/* 플레이 중이 아닌 상태면 게임 종료 */
+			UpdateGame();	/* 상대방 보드판에도 출력 */
+		}
+		else
+		{
+			m_board.order = 1;
+			PlayAI();
+		}
+	}
+}
+
+
+void CTicTacToeDlg::OnBnClickedA12()
+{
+	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
+	if (m_board.state == GameBoard::STATE_PLAY && m_board.order == 0 && m_board.board[2][3] != 'O')
+	{
+		GetDlgItem(IDC_A12)->SetWindowTextW(L"X");
+		m_board.DoMove(2, 3);
+		UpdateGame();
+
+		m_board.CheckState();			/* 게임판 상태를 점검 */
+		if (m_board.state != GameBoard::STATE_PLAY)
+		{
+			EndGame();					/* 플레이 중이 아닌 상태면 게임 종료 */
+			UpdateGame();	/* 상대방 보드판에도 출력 */
+		}
+		else
+		{
+			m_board.order = 1;
+			PlayAI();
+		}
+	}
+}
+
+
+void CTicTacToeDlg::OnBnClickedA13()
+{
+	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
+	if (m_board.state == GameBoard::STATE_PLAY && m_board.order == 0 && m_board.board[3][0] != 'O')
+	{
+		GetDlgItem(IDC_A13)->SetWindowTextW(L"X");
+		m_board.DoMove(3, 0);
+		UpdateGame();
+
+		m_board.CheckState();			/* 게임판 상태를 점검 */
+		if (m_board.state != GameBoard::STATE_PLAY)
+		{
+			EndGame();					/* 플레이 중이 아닌 상태면 게임 종료 */
+			UpdateGame();	/* 상대방 보드판에도 출력 */
+		}
+		else
+		{
+			m_board.order = 1;
+			PlayAI();
+		}
+	}
+}
+
+
+void CTicTacToeDlg::OnBnClickedA14()
+{
+	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
+	if (m_board.state == GameBoard::STATE_PLAY && m_board.order == 0 && m_board.board[3][1] != 'O')
+	{
+		GetDlgItem(IDC_A14)->SetWindowTextW(L"X");
+		m_board.DoMove(3, 1);
+		UpdateGame();
+
+		m_board.CheckState();			/* 게임판 상태를 점검 */
+		if (m_board.state != GameBoard::STATE_PLAY)
+		{
+			EndGame();					/* 플레이 중이 아닌 상태면 게임 종료 */
+			UpdateGame();	/* 상대방 보드판에도 출력 */
+		}
+		else
+		{
+			m_board.order = 1;
+			PlayAI();
+		}
+	}
+}
+
+
+void CTicTacToeDlg::OnBnClickedA15()
+{
+	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
+	if (m_board.state == GameBoard::STATE_PLAY && m_board.order == 0 && m_board.board[3][2] != 'O')
+	{
+		GetDlgItem(IDC_A15)->SetWindowTextW(L"X");
+		m_board.DoMove(3, 2);
+		UpdateGame();
+
+		m_board.CheckState();			/* 게임판 상태를 점검 */
+		if (m_board.state != GameBoard::STATE_PLAY)
+		{
+			EndGame();					/* 플레이 중이 아닌 상태면 게임 종료 */
+			UpdateGame();	/* 상대방 보드판에도 출력 */
+		}
+		else
+		{
+			m_board.order = 1;
+			PlayAI();
+		}
+	}
+}
+
+
+void CTicTacToeDlg::OnBnClickedA16()
+{
+	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
+	if (m_board.state == GameBoard::STATE_PLAY && m_board.order == 0 && m_board.board[3][3] != 'O')
+	{
+		GetDlgItem(IDC_A16)->SetWindowTextW(L"X");
+		m_board.DoMove(3, 3);
 		UpdateGame();
 
 		m_board.CheckState();			/* 게임판 상태를 점검 */
