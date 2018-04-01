@@ -165,7 +165,7 @@ void GameBoard::CheckState()
 {
 	char temp[4][4];
 	int i;
-	 
+
 	for(i=0; i<4; i++)				
 	{	
 		/* 가로 방향을 검사 */

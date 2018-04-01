@@ -2,6 +2,7 @@
 #include "TicTacToeAI.h"
 #include <iostream>
 
+
 /**
 	함 수 : TicTacToeAI(GameBoard board)
 	기 능 : 게임 보드판을 넘겨받는 생성자 함수

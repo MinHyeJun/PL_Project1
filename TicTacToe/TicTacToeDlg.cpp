@@ -7,11 +7,7 @@
 #include "TicTacToeDlg.h"
 #include "afxdialogex.h"
 #include "FileDlg.h"
-
-
-#ifdef _DEBUG
-#define new DEBUG_NEW
-#endif
+#include <crtdbg.h>
 
 
 // 응용 프로그램 정보에 사용되는 CAboutDlg 대화 상자입니다.
@@ -123,6 +119,9 @@ BOOL CTicTacToeDlg::OnInitDialog()
 	SetIcon(m_hIcon, FALSE);		// 작은 아이콘을 설정합니다.
 
 	// TODO: 여기에 추가 초기화 작업을 추가합니다.
+
+	_CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);//////////////////////////////////////////////////////
+
 	m_hAccelTable = ::LoadAccelerators(AfxGetInstanceHandle(), MAKEINTRESOURCE(IDR_ACCELERATOR1));
 
 	GetDlgItem(IDC_BUTTON_UNDO_A)->EnableWindow(false);  // 한 수 무르기 버튼의 접근을 false로 변경
@@ -291,8 +290,19 @@ void CTicTacToeDlg::OnBnClickedButtonSave()
 // 게임 불러오기 버튼 클릭 시 호출 함수
 void CTicTacToeDlg::OnBnClickedButtonLoad()
 {
-	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
-	LoadGame();  // 게임 불러오기 함수 호출
+	if (m_board.state == GameBoard::STATE_PLAY)
+	{
+		int conclusion = MessageBox(L"현재 게임중입니다.\n게임을 중단하고 불러오시겠습니까?", L"불러오기", MB_OKCANCEL);
+		if (conclusion == IDOK)  // OK 버튼을 눌렀다면 현재 게임판 상태를 멈춤으로 변경
+		{
+			m_board.state = GameBoard::STATE_STOP;
+			LoadGame();  // 게임 불러오기 함수 호출
+		}
+	}
+	else
+	{
+		LoadGame();
+	}
 }
 
 //게임이 시작될 준비가 되었는지 확인하는 함수
@@ -704,6 +714,8 @@ void CTicTacToeDlg::LoadGame()
 
 	if(dlg.DoModal()==IDOK)
 	{		
+		m_board.state = GameBoard::STATE_STOP;
+
 		FILE *fp;						/* 파일 포인터 선언 */
 		CStringA name(dlg.m_fileStr);
 
@@ -743,12 +755,13 @@ void CTicTacToeDlg::LoadGame()
 			UpdateGame();  // 게임판 정보를 버튼에 적용
 			// 두 게임 상태창을 초기화
 
+			
 			m_board.CheckState();  // 불러온 게임이 이미 종료된 게임인지 확인
 
-			if (m_board.state == GameBoard::STATE_PLAY)
+			if (m_board.state != GameBoard::STATE_DRAW && m_board.state != GameBoard::STATE_WINA && m_board.state != GameBoard::STATE_WINB)
 			{
 				GetDlgItem(IDC_EDIT_B)->SetWindowTextW(L"<게임 트리>");
-				fclose(fp);
+				
 
 				if (Acnt > Bcnt)			/* 'X'와 'O' 문자 개수를 비교 */
 				{
@@ -764,6 +777,8 @@ void CTicTacToeDlg::LoadGame()
 				EndGame();
 				m_isLoad = 0;
 			}
+
+			fclose(fp);
 		}
 	}
 }
@@ -782,8 +797,8 @@ void CTicTacToeDlg::PlayAI()
 
 	UpdateGame();							/* 게임판 업데이트 */
 
-	delete tttAI;  // 위에서 생성한 AI 객체 반환
 	delete node;  // 위에서 생성한 node 객체 반환
+	delete tttAI;  // 위에서 생성한 AI 객체 반환
 
 	m_board.CheckState();			/* 게임판 상태를 점검 */
 	if (m_board.state != GameBoard::STATE_PLAY)

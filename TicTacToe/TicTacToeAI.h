@@ -13,7 +13,7 @@ public:
 
 public :
 
-	TicTacToeAI(GameBoard board);		
+	TicTacToeAI(GameBoard board);
 	void InitNode(Node* node, int inDepth);		/* AI 기본정보로 초기화 */
 	Node* GetRootNode();						/* Tree 를 출력하기위한 Node 반환 */
 	void GetBestMove();							/* 최적의 좌표를 구함 */
