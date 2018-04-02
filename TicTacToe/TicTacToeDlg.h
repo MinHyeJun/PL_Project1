@@ -35,11 +35,11 @@ protected:
 	DECLARE_MESSAGE_MAP()
 
 public:
-	afx_msg void OnBnClickedButtonStart();
-	afx_msg void OnBnClickedButtonSave();
-	afx_msg void OnBnClickedButtonLoad();
-	afx_msg void OnBnClickedButtonExit();
-	afx_msg void OnBnClickedButtonUndoA();
+	afx_msg void OnBnClickedButtonStart();  // 새 게임 버튼 클릭 함수
+	afx_msg void OnBnClickedButtonSave();  // 저장하기 버튼 클릭 함수
+	afx_msg void OnBnClickedButtonLoad();  // 불러오기 버튼 클릭 함수
+	afx_msg void OnBnClickedButtonExit();  // 끝내기 버튼 클릭 함수
+	afx_msg void OnBnClickedButtonUndoA();  // 무르기 버튼 클릭 함수
 	virtual BOOL PreTranslateMessage(MSG* pMsg);	
 	afx_msg HBRUSH OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor);
 	HACCEL m_hAccelTable;
@@ -59,6 +59,7 @@ public:
 	void StartGame();			/* 게임 시작 */
 	void EndGame();				/* 게임 종료 */
 	void LoadGame();			/* 게임 불러오기 */
+	void SaveGame();            // 게임 저장하기
 
 	/*	사용자 지정 변수 */
 
@@ -67,7 +68,9 @@ public:
 	int m_startCom;			/* 시작하는 COM 종류 */
 	int m_isLoad;			/* 게임이 로드 된 건지 구분 */
 	int m_checkUndo;		/* 무르기를 했는지 여부 구분 */
-	void PlayAI();
+	void PlayAI();          // 컴퓨터가 수를 놓는 함수
+
+	// 사용자가 플레이를 위해 클릭하는 게임판의 버튼 클릭 함수
 	afx_msg void OnBnClickedA1();
 	afx_msg void OnBnClickedA2();
 	afx_msg void OnBnClickedA3();
@@ -84,5 +87,4 @@ public:
 	afx_msg void OnBnClickedA14();
 	afx_msg void OnBnClickedA15();
 	afx_msg void OnBnClickedA16();
-	void SaveGame();
 };

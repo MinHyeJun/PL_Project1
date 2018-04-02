@@ -72,12 +72,12 @@ void GameBoard::InitBoard(int startCom, int movedCnt, int nlevelB)
 {
 	moveCnt = movedCnt;		/* 몇번 째 수를 저장 */
 
-	if(startCom == 0)		/* 시작 컴퓨터와 컴퓨터 레벨을 설정, 시작 컴퓨터가 A인 경우 */
+	if(startCom == 0)		/* 시작 플레이어와 컴퓨터 레벨을 설정, 시작 플레이어가 사용자인 경우 */
 	{	
 		starterCom = 'X';		oppnentCom = 'O';
 		startLevel = 0;	        oppLevel = nlevelB;			
 	}
-	else  // 시작 컴퓨터가 B인 경우		
+	else  // 시작 플레이어가 컴퓨터인 경우		
 	{
 		starterCom = 'O';		oppnentCom = 'X';
 		startLevel = nlevelB;	oppLevel = 0;
@@ -173,12 +173,12 @@ void GameBoard::CheckState()
 		{
 			if((board[i][0]=='X') && (board[i][1]=='X') && (board[i][2]=='X') && (board[i][3]=='X'))  // i행이 모두 X인 경우
 			{
-				state = STATE_WINA;  // 컴퓨터 A의 승
+				state = STATE_WINA;  // 사용자의 승
 				return;
 			}
 			if((board[i][0]=='O') && (board[i][1]=='O') && (board[i][2]=='O') && (board[i][3]=='O'))  // i행이 모두 O인 경우
 			{
-				state = STATE_WINB;  // 컴퓨터 B의 승
+				state = STATE_WINB;  // 컴퓨터의 승
 				return;
 			}
 		}
@@ -188,12 +188,12 @@ void GameBoard::CheckState()
 		{
 			if((board[0][i]=='X') && (board[1][i]=='X') && (board[2][i]=='X') && (board[3][i]=='X'))  // i열이 모두 X인 경우
 			{
-				state = STATE_WINA;  // 컴퓨터 A의 승
+				state = STATE_WINA;  // 사용자의 승
 				return;
 			}
 			if((board[0][i]=='O') && (board[1][i]=='O') && (board[2][i]=='O') && (board[3][i]=='O'))  // i열이 모두 O인 경우
 			{
-				state = STATE_WINB;  // 컴퓨터 B의 승
+				state = STATE_WINB;  // 컴퓨터의 승
 				return;
 			}
 		}
@@ -203,12 +203,12 @@ void GameBoard::CheckState()
 	{
 		if(board[0][0]=='X')  // 그 Text가 X라면
 		{
-			state = STATE_WINA;  // 컴퓨터 A의 승
+			state = STATE_WINA;  // 사용자의 승
 			return;
 		}
 		else  // 그 Text가 O라면
 		{
-			state = STATE_WINB;  // 컴퓨터 B의 승
+			state = STATE_WINB;  // 컴퓨터의 승
 			return;
 		}
 	}
@@ -217,12 +217,12 @@ void GameBoard::CheckState()
 	{
 		if(board[0][3]=='X')  // 그 Text가 X라면
 		{
-			state = STATE_WINA;  // 컴퓨터 A의 승
+			state = STATE_WINA;  // 사용자의 승
 			return;
 		}
 		else  // 그 Text가 O라면
 		{
-			state = STATE_WINB;  // 컴퓨터 B의 승
+			state = STATE_WINB;  // 컴퓨터의 승
 			return;
 		}
 	}

@@ -13,12 +13,12 @@ TicTacToeAI::TicTacToeAI(GameBoard board)
 	root = new Node;  // evaluation 값을 계산하기 위한 트리의 루트 노드
 	InitNode(root, 0);
 
-	if(tttBoard.moveCnt % 2 == 0)  // 놓인 수의 개수가 둘 다 동일하다면 시작한 컴퓨터 차례
+	if(tttBoard.moveCnt % 2 == 0)  // 놓인 수의 개수가 둘 다 동일하다면 시작한 플레이어 차례
 	{
 		LAlevel = tttBoard.startLevel;
 		criterion = tttBoard.starterCom;
 	}
-	else  // 개수가 동일하지 않다면 상대방 컴퓨터 차례
+	else  // 개수가 동일하지 않다면 상대방 플레이어 차례
 	{
 		LAlevel = tttBoard.oppLevel;
 		criterion = tttBoard.oppnentCom;
@@ -77,7 +77,7 @@ void TicTacToeAI::GetBestMove()
 		// 가능한 수 중 가장 가치가 높은 수의 좌표와 값을 저장함
 		if( newValue > bestValue )		/* 구한 eval값이 best값보다 크다면 */
 		{
-			bestValue = newValue;		/* 값을 변경하고 해당 수정보를 저장 */
+			bestValue = newValue;		/* 값을 변경하고 해당 수 정보를 저장 */
 			bestX = iList[i].x;
 			bestY = iList[i].y;
 			root->eval = bestValue;		/* 노드에 값을 저장 */
@@ -348,7 +348,7 @@ int TicTacToeAI::EvaluateBoard(struct treeNode* root)
 		for(int j=0; j<4; j++)
 			calBoard[i][j] = tttBoard.board[i][j];
 
-	/* 가로 3줄, 세로 3줄을 각각 X, O로 이길수있는 수를 계산 */
+	/* 가로 4줄, 세로 4줄을 각각 X, O로 이길수있는 수를 계산 */
 	for(int i=0;i<4;i++)
 	{
 		if( (calBoard[i][0]=='X' || calBoard[i][0]==' ') && 

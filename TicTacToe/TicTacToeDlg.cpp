@@ -120,8 +120,6 @@ BOOL CTicTacToeDlg::OnInitDialog()
 
 	// TODO: 여기에 추가 초기화 작업을 추가합니다.
 
-	_CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);//////////////////////////////////////////////////////
-
 	m_hAccelTable = ::LoadAccelerators(AfxGetInstanceHandle(), MAKEINTRESOURCE(IDR_ACCELERATOR1));
 
 	GetDlgItem(IDC_BUTTON_UNDO_A)->EnableWindow(false);  // 한 수 무르기 버튼의 접근을 false로 변경
@@ -129,7 +127,7 @@ BOOL CTicTacToeDlg::OnInitDialog()
 
 	m_isLoad = 0;  // 게임 로드 여부 초기화
 	m_checkUndo = 0;  // 무르기 여부 초기화
-	m_startCom = 0;  ////////////////////////////////////////////
+	m_startCom = 0;  // 시작하는 플레이어는 사용자로 고정
 
 	SetGame();  // 게임 셋팅
 	
@@ -224,12 +222,12 @@ HBRUSH CTicTacToeDlg::OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor)
 void CTicTacToeDlg::OnBnClickedButtonExit()
 {
 	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
-	int conclusion;
+	int conclusion;  // 메세지박스로부터 입력을 받기 위한 변수
 
 	if (m_board.state == GameBoard::STATE_PLAY)  // 현재 게임판 상태가 플레이중이라면 
 	{
 		conclusion = MessageBox(L"현재 게임중입니다.\n게임을 종료 하시겠습니까?", L"게임 끝내기", MB_OKCANCEL);
-		if (conclusion == IDOK)  // OK 버튼을 눌렀다면 현재 게임판 상태를 멈춤으로 변경
+		if (conclusion == IDOK)  // OK 버튼을 눌렀다면 현재 게임판 상태를 멈춤으로 변경 후 종료
 		{
 			m_board.state = GameBoard::STATE_STOP;
 			AfxGetMainWnd()->PostMessageW(WM_QUIT);
@@ -239,7 +237,7 @@ void CTicTacToeDlg::OnBnClickedButtonExit()
 	{  
 		conclusion = MessageBox(L"게임을 종료 하시겠습니까?", L"게임 종료", MB_OKCANCEL);
 		if(conclusion == IDOK)  // OK 버튼을 눌렀다면 프로그램을 종료함
-			exit(0);
+			AfxGetMainWnd()->PostMessageW(WM_QUIT);
 	}
 }
 
@@ -247,17 +245,20 @@ void CTicTacToeDlg::OnBnClickedButtonExit()
 void CTicTacToeDlg::OnBnClickedButtonUndoA()
 {
 	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
+
+	// 사용자와 컴퓨터의 수를 하나씩 무르기
 	m_board.UndoMove();
 	m_board.UndoMove();
 
-	m_board.order = 1;
+	m_board.order = 1;  // 수를 무른 게임판 정보를 토대로 컴퓨터의 게임판을 업데이트
 	UpdateGame();
-	m_board.order = 0;
+
+	m_board.order = 0;  // 수를 무른 게임판 정보를 토대로 사용자의 게임판을 업데이트
 	UpdateGame();
 
 	GetDlgItem(IDC_EDIT_B)->SetWindowTextW(L"한 수 무르기를 사용하였습니다.");
 
-	if (m_board.moveCnt < 2)
+	if (m_board.moveCnt < 2)  // 게임판에 두어진 수가 2개 미만일 때 한 수 무르기 사용 불가
 		m_undoA.EnableWindow(false);
 }
 
@@ -270,7 +271,7 @@ void CTicTacToeDlg::OnBnClickedButtonStart()
 	if (m_board.state == GameBoard::STATE_PLAY)  // 현재 게임판 상태가 플레이중이라면 
 	{
 		conclusion = MessageBox(L"현재 게임중입니다.\n게임을 다시 시작하시겠습니까?", L"새 게임", MB_OKCANCEL);
-		if (conclusion == IDOK)  // OK 버튼을 눌렀다면 현재 게임판 상태를 멈춤으로 변경
+		if (conclusion == IDOK)  // OK 버튼을 눌렀다면 현재 게임판 상태를 멈추고 다시 시작
 		{
 			m_board.state = GameBoard::STATE_STOP;
 			StartGame();
@@ -280,22 +281,23 @@ void CTicTacToeDlg::OnBnClickedButtonStart()
 		StartGame();  // 게임 시작 함수 호출
 }
 
-// 초기화 버튼 클릭 시 호출 함수
+// 저장하기 버튼 클릭 시 호출 함수
 void CTicTacToeDlg::OnBnClickedButtonSave()
 {
 	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
-	SaveGame();  // 게임 초기화 함수 호출
+	SaveGame();  // 게임 저장 함수 호출
 }
 
 // 게임 불러오기 버튼 클릭 시 호출 함수
 void CTicTacToeDlg::OnBnClickedButtonLoad()
 {
-	if (m_board.state == GameBoard::STATE_PLAY)
+	if (m_board.state == GameBoard::STATE_PLAY)  // 게임 플레이 중이라면
 	{
 		int conclusion = MessageBox(L"현재 게임중입니다.\n게임을 중단하고 불러오시겠습니까?", L"불러오기", MB_OKCANCEL);
-		if (conclusion == IDOK)  // OK 버튼을 눌렀다면 현재 게임판 상태를 멈춤으로 변경
+		if (conclusion == IDOK)  // OK 버튼을 눌렀다면 현재 게임판 상태를 멈춤으로 변경 후 불러오기
 		{
 			m_board.state = GameBoard::STATE_STOP;
+			m_undoA.EnableWindow(FALSE);
 			LoadGame();  // 게임 불러오기 함수 호출
 		}
 	}
@@ -310,15 +312,15 @@ int CTicTacToeDlg::CheckReady()
 {
 	UpdateData(TRUE);
 
-	int level_b = m_comboB.GetCurSel();  // 컴퓨터 B의 선택된 레벨 정보 가져오기
+	int level_b = m_comboB.GetCurSel();  // 컴퓨터의 선택된 레벨 정보 가져오기
 
-	if(level_b == -1)  // 두 컴퓨터 중 하나라도 레벨이 선택되지 않았다면
+	if(level_b == -1)  // 레벨이 선택되지 않았다면
 		return -1;  // 레벨 선택이 되어 있지 않음: -1
-	else if(m_startCom == -1)  // 선공 컴퓨터가 선택되지 않았다면
-		return 0;  // 선공 컴퓨터가 선택되지 않음: 0
+	else if(m_startCom == -1)  // 선공 플레이어가 정해지지 않았다면
+		return 0;  // 선공이 선택되지 않음: 0
 	else
 	{
-		switch(level_b)  // 선택된 레벨 정보에 따라 컴퓨터 B의 레벨 셋팅
+		switch(level_b)  // 선택된 레벨 정보에 따라 컴퓨터의 레벨 셋팅
 		{
 		case 0 : m_levelB = 3; break;			
 		case 1 : m_levelB = 5; break;			
@@ -334,14 +336,15 @@ void CTicTacToeDlg::SetGame()
 {
 	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
 
-	// 컴퓨터 B의 evaluate 레벨 선택 콤보박스에 레벨 셋팅
+	// 컴퓨터의 evaluate 레벨 선택 콤보박스에 레벨 셋팅
 	m_comboB.AddString(L"Level 3");
 	m_comboB.AddString(L"Level 5");
 
+	// 디폴트로 레벨 3으로 셋팅
 	m_comboB.SetCurSel(0);
 	m_levelB = 3;
 
-	// 두 컴퓨터의 상태창에 초기 텍스트를 셋팅
+	// 상태창에 초기 텍스트를 셋팅
 	GetDlgItem(IDC_EDIT_B)->SetWindowTextW(L"<게임 트리>");
 }
 
@@ -367,15 +370,21 @@ void CTicTacToeDlg::StartGame()
 		else
 		{
 			m_board.InitBoard(m_startCom, 0, m_levelB);	/* 아니라면, 새로운 판으로 초기화 */
-			m_board.order = 0;
+			m_board.order = 0;  // 사용자부터 게임을 시작하기 때문에 게임 순서 사용자로 셋팅
 		}
 
 		GetDlgItem(IDC_EDIT_B)->SetWindowTextW(L"게임을 시작합니다.");
 		UpdateGame();  // 게임판을 화면으로 보여주는 함수 호출
+
+		if(m_board.moveCnt < 2)
+			m_undoA.EnableWindow(FALSE);
+		else
+			m_undoA.EnableWindow(TRUE);
+
 		m_board.state = GameBoard::STATE_PLAY;						/* 보드판 상태를 플레이 중으로 변경 */
 
-		if(m_board.order == 1)
-			PlayAI();
+		if(m_board.order == 1)  // 게임 순서가 컴퓨터라면
+			PlayAI();  // 컴퓨터 AI 플레이
 	}
 	else if(checkErr == -1)	/* 레벨 설정이 안되어있을때 오류 출력 */
 	{
@@ -438,22 +447,22 @@ void CTicTacToeDlg::PrintTreeNode(Node* root)
 
 	if(m_board.moveCnt % 2 == 1)  // 놓여진 수가 홀수일 때(선공 차례일 때)
 	{
-		if(m_board.starterCom == 'X')  // 시작한 컴퓨터가 X(컴퓨터 A)라면
+		if(m_board.starterCom == 'X')  // 시작한 플레이어가 X(사용자)라면
 		{
 			GetDlgItem(IDC_EDIT_B)->SetWindowTextW(L"<게임 트리>");
 		}	
-		else  // 시작한 컴퓨터가 O(컴퓨터 B)라면
+		else  // 시작한 플레이어가 O(컴퓨터)라면
 		{
 			GetDlgItem(IDC_EDIT_B)->SetWindowTextW(temp);
 		}
 	}
 	else  // 놓여진 수가 짝수일 때(후공 차례일 때)
 	{
-		if(m_board.starterCom == 'X')  // 시작한 컴퓨터가 X(컴퓨터 A)라면
+		if(m_board.starterCom == 'X')  // 시작한 플레이어가 X(사용자)라면
 		{
 			GetDlgItem(IDC_EDIT_B)->SetWindowTextW(temp);
 		}	
-		else  // 시작한 컴퓨터가 O(컴퓨터 B)라면
+		else  // 시작한 플레이어가 O(컴퓨터)라면
 		{
 			GetDlgItem(IDC_EDIT_B)->SetWindowTextW(L"<게임 트리>");
 		}
@@ -471,7 +480,7 @@ void CTicTacToeDlg::ResetGame()
 	int count = 0;  // 게임 보드판의 버튼을 숫자로 바꾸기 위해 숫자를 담는 변수
 
 	m_startCom = 0;  // 시작한 컴퓨터 종류 초기화
-	m_board.order = 0;
+	m_board.order = 0;  // 현재 게임 차례를 사용자로 초기화
 	UpdateData(FALSE);
 
 	m_board.state = GameBoard::STATE_INIT;  // 게임 상태를 초기화로 지정
@@ -493,7 +502,7 @@ void CTicTacToeDlg::ResetGame()
 	GetDlgItem(IDC_EDIT_B)->SetWindowTextW(L"<게임 트리>");
 	// 한 수 무르기 버튼의 접근을 false로 변경
 	m_undoA.EnableWindow(FALSE);
-	// 레벨 선택 콤보박스의 텍스트들을 모두 초기화
+	// 컴퓨터 레벨 선택 초기화
 	m_comboB.SetCurSel(0);
 	m_levelB = 3;
 }
@@ -507,11 +516,11 @@ void CTicTacToeDlg::EndGame()
 {
 	switch(m_board.state)  // 게임의 상태를 체크하여 결과를 출력
 	{
-	case GameBoard::STATE_WINA :  // 컴퓨터 A가 이긴 경우
+	case GameBoard::STATE_WINA :  // 플레이어가 이긴 경우
 		GetDlgItem(IDC_EDIT_B)->SetWindowTextW(L"게임에 이겼습니다.");
 		break;
 
-	case GameBoard::STATE_WINB :  // 컴퓨터 B가 이긴 경우
+	case GameBoard::STATE_WINB :  // 컴퓨터가 이긴 경우
 		GetDlgItem(IDC_EDIT_B)->SetWindowTextW(L"게임에 졌습니다.");
 		break;
 		
@@ -543,25 +552,25 @@ int CTicTacToeDlg::WaitUndo()
 	DWORD dwStart;  // 5초의 시간을 측정하기 위해 측정 시작 지점을 저장하기 위한 변수
 	dwStart = GetTickCount();  // 시간 측정 시작 지점을 저장
 
-	// 어떤 컴퓨터의 차례인지에 따라 한 수 무르기의 버튼 접근 상태를 달리함
+	// 어떤 플레이어의 차례인지에 따라 한 수 무르기의 버튼 접근 상태를 달리함
 	if(m_board.moveCnt % 2 == 1)   // 놓여진 수가 홀수일 때(선공 차례일 때)
 	{
-		if(m_board.starterCom == 'X')  // 시작한 컴퓨터가 X(컴퓨터 A)라면
+		if(m_board.starterCom == 'X')  // 시작한 플레이어가 X(사용자)라면
 		{
 			m_undoA.EnableWindow(TRUE);
 		}
-		else  // 시작한 컴퓨터가 O(컴퓨터 B)라면
+		else  // 시작한 플레이어가 O(컴퓨터)라면
 		{
 			m_undoA.EnableWindow(FALSE);
 		}
 	}
 	else   // 놓여진 수가 짝수일 때(후공 차례일 때)
 	{
-		if(m_board.starterCom == 'X')  // 시작한 컴퓨터가 X(컴퓨터 A)라면
+		if(m_board.starterCom == 'X')  // 시작한 플레이어가 X(사용자)라면
 		{
 			m_undoA.EnableWindow(FALSE);
 		}
-		else  // 시작한 컴퓨터가 O(컴퓨터 B)라면
+		else  // 시작한 플레이어가 O(컴퓨터)라면
 		{
 			m_undoA.EnableWindow(TRUE);
 		}
@@ -599,16 +608,16 @@ void CTicTacToeDlg::UpdateGame()
 	// 게임판 정보를 화면에 업데이트할 컴퓨터의 게임판 버튼의 첫번째 버튼 아이디정보를 얻어옴
 	if(m_board.order == 0)  // 놓여진 수가 홀수일 때(선공 차례일 때)
 	{
-		if(m_board.starterCom == 'X')  // 시작한 컴퓨터가 X(컴퓨터 A)라면
+		if(m_board.starterCom == 'X')  // 시작한 플레이어가 X(사용자)라면
 			comButton = IDC_A1;
-		else  // 시작한 컴퓨터가 O(컴퓨터 B)라면
+		else  // 시작한 플레이어가 O(컴퓨터)라면
 			comButton = IDC_B1;
 	}
 	else  // 놓여진 수가 짝수일 때(후공 차례일 때)
 	{
-		if(m_board.starterCom == 'X')  // 시작한 컴퓨터가 X(컴퓨터 A)라면
+		if(m_board.starterCom == 'X')  // 시작한 플레이어가 X(사용자)라면
 			comButton = IDC_B1;
-		else  // 시작한 컴퓨터가 O(컴퓨터 B)라면
+		else  // 시작한 플레이어가 O(컴퓨터)라면
 			comButton = IDC_A1;
 	}
 
@@ -630,7 +639,7 @@ void CTicTacToeDlg::UpdateGame()
 		}
 	}
 
-	// 게임이 플레이 상태가 아닐 경우, 게임판 정보를 컴퓨터 A, B 둘 다 동일하게 적용
+	// 게임이 플레이 상태가 아닐 경우, 게임판 정보를 사용자, 플레이어 둘 다 동일하게 적용
 	// 위와 동일한 방법
 	count = 0;
 	if(m_board.state != GameBoard::STATE_PLAY)
@@ -661,7 +670,7 @@ void CTicTacToeDlg::UpdateGame()
 	}
 }
 
-
+// 게임판 정보를 파일로 저장하는 함수
 void CTicTacToeDlg::SaveGame()
 {
 	CFileDlg dlg;
@@ -682,14 +691,14 @@ void CTicTacToeDlg::SaveGame()
 			{
 				for (int j = 0; j < 4; j++)
 				{
-					if (m_board.board[i][j] == 'X')
-						fprintf(fp, "X");
-					else if (m_board.board[i][j] == 'O')
-						fprintf(fp, "O");
-					else
-						fprintf(fp, "B");
+					if (m_board.board[i][j] == 'X')  // 해당 위치의 정보가 X라면
+						fprintf(fp, "X");  // X를 파일에 출력
+					else if (m_board.board[i][j] == 'O')  // 해당 위치의 정보가 O라면
+						fprintf(fp, "O");  // O를 파일에 출력
+					else  // X도, O도 아니라면
+						fprintf(fp, "B");  // B를 파일에 출력
 				}
-				fprintf(fp, "\n");
+				fprintf(fp, "\n");  // 한 행의 정보가 다 입력되면 개행 입력
 			}
 			fclose(fp);
 			GetDlgItem(IDC_EDIT_B)->SetWindowTextW(L"게임을 저장했습니다.");
@@ -714,7 +723,7 @@ void CTicTacToeDlg::LoadGame()
 
 	if(dlg.DoModal()==IDOK)
 	{		
-		m_board.state = GameBoard::STATE_STOP;
+		m_board.state = GameBoard::STATE_STOP;  //게임을 중지상태로 변경
 
 		FILE *fp;						/* 파일 포인터 선언 */
 		CStringA name(dlg.m_fileStr);
@@ -727,7 +736,7 @@ void CTicTacToeDlg::LoadGame()
 		else		/* 제대로 열린 파일이라면 */
 		{
 			int i, j, stoneCount=0;
-			int Acnt = 0 , Bcnt = 0;  // 컴퓨터 A와 B가 둔 수의 개수를 비교하기 위한 변수
+			int Acnt = 0 , Bcnt = 0;  // 사용자와 컴퓨터가 둔 수의 개수를 비교하기 위한 변수
 			char temp[5];  // 파일에 저장된 내용을 읽어들이기 위한 문자열
 
 			for(i=0; i<4; i++)
@@ -758,23 +767,23 @@ void CTicTacToeDlg::LoadGame()
 			
 			m_board.CheckState();  // 불러온 게임이 이미 종료된 게임인지 확인
 
-			if (m_board.state != GameBoard::STATE_DRAW && m_board.state != GameBoard::STATE_WINA && m_board.state != GameBoard::STATE_WINB)
+			if (m_board.state != GameBoard::STATE_DRAW && m_board.state != GameBoard::STATE_WINA && m_board.state != GameBoard::STATE_WINB)  // 게임이 끝나지 않았다면
 			{
 				GetDlgItem(IDC_EDIT_B)->SetWindowTextW(L"<게임 트리>");
 				
 
 				if (Acnt > Bcnt)			/* 'X'와 'O' 문자 개수를 비교 */
 				{
-					m_board.order = 1;      /* A가 작으면 B가 시작 컴퓨터 */
+					m_board.order = 1;      /* A가 크면 컴퓨터의 차례*/
 				}
 				else
 				{
-					m_board.order = 0;          /* 동일하면, A가 시작 컴퓨터 */
+					m_board.order = 0;          /* 동일하면 사용자의 차례 */
 				}
 			}
-			else
+			else  // 이미 끝난 게임이라면
 			{
-				EndGame();
+				EndGame(); 
 				m_isLoad = 0;
 			}
 
@@ -783,6 +792,7 @@ void CTicTacToeDlg::LoadGame()
 	}
 }
 
+// 컴퓨터가 플레이하기 위한 함수
 void CTicTacToeDlg::PlayAI()
 {
 	m_undoA.EnableWindow(false);
@@ -801,20 +811,20 @@ void CTicTacToeDlg::PlayAI()
 	delete tttAI;  // 위에서 생성한 AI 객체 반환
 
 	m_board.CheckState();			/* 게임판 상태를 점검 */
-	if (m_board.state != GameBoard::STATE_PLAY)
+	if (m_board.state != GameBoard::STATE_PLAY)  // 게임이 끝났다면
 	{
 		EndGame();					/* 플레이 중이 아닌 상태면 게임 종료 */
 		UpdateGame();	/* 상대방 보드판에도 출력 */
 	}
-	else
+	else  // 게임이 끝나지 않았다면
 	{
-		m_board.order = 0;
-		UpdateGame();
+		m_board.order = 0;  // 사용자의 플레이 차례
+		UpdateGame();  // 사용자의 게임판의 정보를 업데이트
 		m_undoA.EnableWindow(true);
 	}
 }
 
-
+// OnBnClickedA1~16 사용자가 플레이하기 위해 게임판 버튼의 클릭 함수
 void CTicTacToeDlg::OnBnClickedA1()
 {
 	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.

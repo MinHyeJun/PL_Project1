@@ -26,8 +26,8 @@ public :
 	char oppnentCom;		/* 상대방 컴퓨터 종류 */
 	int order;  // 수를 놓는 플레이어 순서
 
-	static const int STATE_WINA = 3;		/* 컴퓨터A가 이겼을 때 */
-	static const int STATE_WINB = 4;		/* 컴퓨터B가 이겼을 때 */
+	static const int STATE_WINA = 3;		/* 사용자가 이겼을 때 */
+	static const int STATE_WINB = 4;		/* 컴퓨터가 이겼을 때 */
 	static const int STATE_DRAW = 5;		/* 게임이 비겼을 때 */
 	static const int STATE_PLAY = 7;		/* 현재 게임 중 일 때 */
 	static const int STATE_INIT = 8;		/* 게임이 초기화된 상태 */
