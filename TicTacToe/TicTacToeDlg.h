@@ -52,7 +52,6 @@ public:
 
 	void SetGame();			/* 게임 초기 화면 셋팅 */
 	int CheckReady();		/* 게임 시작 준비 상태를 검사 */
-	int WaitUndo();			/* 무르기를 기다림 */
 	void UpdateGame();		/* 게임 수를 화면에 업데이트 */
 	void ResetGame();		/* 게임판을 다시 초기화 */
 	void PrintTreeNode(Node* root);	/* eval 값 노드들을 출력 */

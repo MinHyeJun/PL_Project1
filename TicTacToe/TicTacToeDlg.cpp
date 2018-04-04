@@ -340,12 +340,12 @@ void CTicTacToeDlg::SetGame()
 	m_comboB.AddString(L"Level 3");
 	m_comboB.AddString(L"Level 5");
 
-	// 디폴트로 레벨 3으로 셋팅
-	m_comboB.SetCurSel(0);
-	m_levelB = 3;
-
 	// 상태창에 초기 텍스트를 셋팅
 	GetDlgItem(IDC_EDIT_B)->SetWindowTextW(L"<게임 트리>");
+
+	// 디폴트로 레벨 3
+	m_comboB.SetCurSel(0);
+	m_levelB = 3;
 }
 
 /**
@@ -394,6 +394,38 @@ void CTicTacToeDlg::StartGame()
 		MessageBox(L"ERROR : 시작순서 설정을 확인하세요!", L"Error!", MB_ICONERROR);
 }
 
+// 컴퓨터가 플레이하기 위한 함수
+void CTicTacToeDlg::PlayAI()
+{
+	m_undoA.EnableWindow(false);
+
+	TicTacToeAI* tttAI = new TicTacToeAI(m_board);	/* 새로운 AI 객체를 생성 */
+
+	tttAI->GetBestMove();							/* 최적의 좌표를 구함 */
+	m_board.DoMove(tttAI->bestX, tttAI->bestY);		/* 해당 좌표에 수를 둠 */
+
+	Node* node = tttAI->GetRootNode();			/* 최적의 좌표를 구하는동안 저장한 트리 중 루트노드 반환 */
+	this->PrintTreeNode(node);					/* 트리 출력 */
+
+	UpdateGame();							/* 게임판 업데이트 */
+
+	delete node;  // 위에서 생성한 node 객체 반환
+	delete tttAI;  // 위에서 생성한 AI 객체 반환
+
+	m_board.CheckState();			/* 게임판 상태를 점검 */
+	if (m_board.state != GameBoard::STATE_PLAY)  // 게임이 끝났다면
+	{
+		EndGame();					/* 플레이 중이 아닌 상태면 게임 종료 */
+		UpdateGame();	/* 상대방 보드판에도 출력 */
+	}
+	else  // 게임이 끝나지 않았다면
+	{
+		m_board.order = 0;  // 사용자의 플레이 차례
+		UpdateGame();  // 사용자의 게임판의 정보를 업데이트
+		m_undoA.EnableWindow(true);
+	}
+}
+
 /**
 	함 수 : PrintTreeNode(Node* root)
 	기 능 : AI를 통해서 최적의 좌표를 구하는동안의 Eval 값을 저장한 노드들로 구성된
@@ -402,38 +434,38 @@ void CTicTacToeDlg::StartGame()
 void CTicTacToeDlg::PrintTreeNode(Node* root)
 {
 	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
-	int preDepth = 0 ;			/* 이전 노드의 깊이 */
+	int preDepth = 0;			/* 이전 노드의 깊이 */
 	bool preParent = false;		/* 부모가 같은지 여부 점검 */
 	Node *pNode = root;			/* 루트노드를 복사 */
 	CString temp, temp2;        // temp: 출력할 문자열, temp2: temp에 evaluation 값을 넣는 것을 도와줄 문자열
 	queue <Node* > que;			/* 큐 생성 */
 
 	que.push(pNode);			/* 큐에 루트노드를 넣고 */
-	while(!que.empty())			/* 큐가 비어있을 때 까지 출력 */
-	{		
+	while (!que.empty())			/* 큐가 비어있을 때 까지 출력 */
+	{
 		pNode = que.front();	/* 앞에서 꺼내서 */
 		que.pop();
-		if(pNode != NULL)		/* NULL 값이 아니고 */
+		if (pNode != NULL)		/* NULL 값이 아니고 */
 		{
-			if( preDepth != pNode->depth )	/* 이전 노드값과 깊이가 다르면 */
+			if (preDepth != pNode->depth)	/* 이전 노드값과 깊이가 다르면 */
 				temp = temp + (L"\r\n");	/* 개행 */
 
-			if(preParent)					/* 부모노드가 같으면 */
+			if (preParent)					/* 부모노드가 같으면 */
 				temp = temp + (L", ");		/* 이어서 출력 */
 			else
 				temp = temp + (L"(");		/* 다르면 '(' 로 구분 */
-			
+
 			temp2.Format(L"%d", pNode->eval);
-			temp = temp + temp2;			
+			temp = temp + temp2;
 
-			preParent = true;				
+			preParent = true;
 
-			if(pNode->childCnt != 0)		/* 자식노드 개수가 0이 아니면 */
+			if (pNode->childCnt != 0)		/* 자식노드 개수가 0이 아니면 */
 			{
 				que.push(NULL);				/* NULL 값으로 부모노드 구분 해주고 */
-				for(int j=0; j < pNode->childCnt; j++)
+				for (int j = 0; j < pNode->childCnt; j++)
 					que.push(pNode->next[j]);		/* 자식노드를 큐에 넣음 */
-				
+
 			}
 			preDepth = pNode->depth;				/* 노드 깊이를 변경 */
 		}
@@ -445,27 +477,13 @@ void CTicTacToeDlg::PrintTreeNode(Node* root)
 	}
 	temp = temp + (L")");
 
-	if(m_board.moveCnt % 2 == 1)  // 놓여진 수가 홀수일 때(선공 차례일 때)
+	if (m_board.order == 0)  // 시작한 플레이어가 사용자라면
 	{
-		if(m_board.starterCom == 'X')  // 시작한 플레이어가 X(사용자)라면
-		{
-			GetDlgItem(IDC_EDIT_B)->SetWindowTextW(L"<게임 트리>");
-		}	
-		else  // 시작한 플레이어가 O(컴퓨터)라면
-		{
-			GetDlgItem(IDC_EDIT_B)->SetWindowTextW(temp);
-		}
+		GetDlgItem(IDC_EDIT_B)->SetWindowTextW(L"<게임 트리>");
 	}
-	else  // 놓여진 수가 짝수일 때(후공 차례일 때)
+	else  // 시작한 플레이어가 컴퓨터라면
 	{
-		if(m_board.starterCom == 'X')  // 시작한 플레이어가 X(사용자)라면
-		{
-			GetDlgItem(IDC_EDIT_B)->SetWindowTextW(temp);
-		}	
-		else  // 시작한 플레이어가 O(컴퓨터)라면
-		{
-			GetDlgItem(IDC_EDIT_B)->SetWindowTextW(L"<게임 트리>");
-		}
+		GetDlgItem(IDC_EDIT_B)->SetWindowTextW(temp);
 	}
 }
 
@@ -479,7 +497,7 @@ void CTicTacToeDlg::ResetGame()
 	CString tempStr, str;
 	int count = 0;  // 게임 보드판의 버튼을 숫자로 바꾸기 위해 숫자를 담는 변수
 
-	m_startCom = 0;  // 시작한 컴퓨터 종류 초기화
+	m_startCom = 0;  // 시작한 플레이어 종류 초기화
 	m_board.order = 0;  // 현재 게임 차례를 사용자로 초기화
 	UpdateData(FALSE);
 
@@ -541,60 +559,6 @@ void CTicTacToeDlg::EndGame()
 }
 
 /**
-	함 수 : WaitUndo()
-	기 능 : 컴퓨터가 수를 해당 좌표에 놓고 무르기를 하기까지 5초동안 기다리는
-			함수. 무르기를 시전하면 1을 리턴하고 그렇지 않으면 0을 리턴
-*/
-int CTicTacToeDlg::WaitUndo()
-{
-	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
-	MSG msg;  // 해당 프로세스에 할당된 스레드의 각종 정보를 얻기위한 구조체
-	DWORD dwStart;  // 5초의 시간을 측정하기 위해 측정 시작 지점을 저장하기 위한 변수
-	dwStart = GetTickCount();  // 시간 측정 시작 지점을 저장
-
-	// 어떤 플레이어의 차례인지에 따라 한 수 무르기의 버튼 접근 상태를 달리함
-	if(m_board.moveCnt % 2 == 1)   // 놓여진 수가 홀수일 때(선공 차례일 때)
-	{
-		if(m_board.starterCom == 'X')  // 시작한 플레이어가 X(사용자)라면
-		{
-			m_undoA.EnableWindow(TRUE);
-		}
-		else  // 시작한 플레이어가 O(컴퓨터)라면
-		{
-			m_undoA.EnableWindow(FALSE);
-		}
-	}
-	else   // 놓여진 수가 짝수일 때(후공 차례일 때)
-	{
-		if(m_board.starterCom == 'X')  // 시작한 플레이어가 X(사용자)라면
-		{
-			m_undoA.EnableWindow(FALSE);
-		}
-		else  // 시작한 플레이어가 O(컴퓨터)라면
-		{
-			m_undoA.EnableWindow(TRUE);
-		}
-	}
-
-	// 시간 측정 시점으로부터 5초 경과되기 전까지
-	while(GetTickCount() - dwStart < 5000)
-	{
-		while(PeekMessage(&msg, NULL, 0, 0, PM_REMOVE))
-		{
-			PreTranslateMessage(&msg);
-			DispatchMessage(&msg);
-		}
-
-		if(m_checkUndo == 1)		/* 무르기를 시전했다면 */
-		{
-			m_checkUndo = 0;		/* 체크값을 0으로 바꾼 뒤 1을 반환(한 수 무르기 입력을 다시 받기 위해 0으로 바꿈) */
-			return 1;
-		}
-	}
-	return 0;						/* 아니라면, 0을 반환 */
-}
-
-/**
 	함 수 : UpdateGame()
 	기 능 : 해당 게임판을 화면으로 업데이트 해주는 함수
 */
@@ -604,36 +568,26 @@ void CTicTacToeDlg::UpdateGame()
 	int count = 0;  // 텍스트정보를 변경할 버튼 지정하기 위한 일종의 index
 	int comButton = 0;  // 변경할 게임판의 첫번째 버튼 아이디 정보를 저장하기 위한 변수
 	CString str;
-	
-	// 게임판 정보를 화면에 업데이트할 컴퓨터의 게임판 버튼의 첫번째 버튼 아이디정보를 얻어옴
-	if(m_board.order == 0)  // 놓여진 수가 홀수일 때(선공 차례일 때)
-	{
-		if(m_board.starterCom == 'X')  // 시작한 플레이어가 X(사용자)라면
-			comButton = IDC_A1;
-		else  // 시작한 플레이어가 O(컴퓨터)라면
-			comButton = IDC_B1;
-	}
-	else  // 놓여진 수가 짝수일 때(후공 차례일 때)
-	{
-		if(m_board.starterCom == 'X')  // 시작한 플레이어가 X(사용자)라면
-			comButton = IDC_B1;
-		else  // 시작한 플레이어가 O(컴퓨터)라면
-			comButton = IDC_A1;
-	}
+
+	// 게임판 정보를 화면에 업데이트할 플레이어 게임판 버튼의 첫번째 버튼 아이디정보를 얻어옴
+	if (m_board.order == 0)  // 플레이할 차례가 사용자라면
+		comButton = IDC_A1;
+	else  // 시작한 플레이어가 컴퓨터라면
+		comButton = IDC_B1;
 
 	// 게임판 보드 정보를 게임판 버튼에 적용, 숫자 -> O or X
-	for(int i=0; i<4; i++)
+	for (int i = 0; i < 4; i++)
 	{
-		for(int j=0; j<4; j++)
+		for (int j = 0; j < 4; j++)
 		{
-			if(m_board.board[i][j] == 'X')  // X인 경우 count번째 버튼의 text를 X로 변경
-				SetDlgItemText(comButton+count, L"X");
-			else if(m_board.board[i][j] == 'O')  // O인 경우 count번째 버튼의 text를 O로 변경
-				SetDlgItemText(comButton+count, L"O");
+			if (m_board.board[i][j] == 'X')  // X인 경우 count번째 버튼의 text를 X로 변경
+				SetDlgItemText(comButton + count, L"X");
+			else if (m_board.board[i][j] == 'O')  // O인 경우 count번째 버튼의 text를 O로 변경
+				SetDlgItemText(comButton + count, L"O");
 			else  // X나 O가 아니라면 다시 숫자로 적용
 			{
-				str.Format(L"%d", count+1);
-				SetDlgItemText(comButton+count, str);
+				str.Format(L"%d", count + 1);
+				SetDlgItemText(comButton + count, str);
 			}
 			count++;
 		}
@@ -642,27 +596,27 @@ void CTicTacToeDlg::UpdateGame()
 	// 게임이 플레이 상태가 아닐 경우, 게임판 정보를 사용자, 플레이어 둘 다 동일하게 적용
 	// 위와 동일한 방법
 	count = 0;
-	if(m_board.state != GameBoard::STATE_PLAY)
+	if (m_board.state != GameBoard::STATE_PLAY)
 	{
-		for(int i=0; i<4; i++)
+		for (int i = 0; i < 4; i++)
 		{
-			for(int j=0; j<4; j++)
+			for (int j = 0; j < 4; j++)
 			{
-				if(m_board.board[i][j] == 'X')
+				if (m_board.board[i][j] == 'X')
 				{
-					SetDlgItemText(IDC_A1+count, L"X");
-					SetDlgItemText(IDC_B1+count, L"X");
+					SetDlgItemText(IDC_A1 + count, L"X");
+					SetDlgItemText(IDC_B1 + count, L"X");
 				}
-				else if(m_board.board[i][j] == 'O')
+				else if (m_board.board[i][j] == 'O')
 				{
-					SetDlgItemText(IDC_A1+count, L"O");
-					SetDlgItemText(IDC_B1+count, L"O");
+					SetDlgItemText(IDC_A1 + count, L"O");
+					SetDlgItemText(IDC_B1 + count, L"O");
 				}
 				else
 				{
-					str.Format(L"%d", count+1);
-					SetDlgItemText(IDC_A1+count, str);
-					SetDlgItemText(IDC_B1+count, str);
+					str.Format(L"%d", count + 1);
+					SetDlgItemText(IDC_A1 + count, str);
+					SetDlgItemText(IDC_B1 + count, str);
 				}
 				count++;
 			}
@@ -789,38 +743,6 @@ void CTicTacToeDlg::LoadGame()
 
 			fclose(fp);
 		}
-	}
-}
-
-// 컴퓨터가 플레이하기 위한 함수
-void CTicTacToeDlg::PlayAI()
-{
-	m_undoA.EnableWindow(false);
-
-	TicTacToeAI* tttAI = new TicTacToeAI(m_board);	/* 새로운 AI 객체를 생성 */
-
-	tttAI->GetBestMove();							/* 최적의 좌표를 구함 */
-	m_board.DoMove(tttAI->bestX, tttAI->bestY);		/* 해당 좌표에 수를 둠 */
-
-	Node* node = tttAI->GetRootNode();			/* 최적의 좌표를 구하는동안 저장한 트리 중 루트노드 반환 */
-	this->PrintTreeNode(node);					/* 트리 출력 */
-
-	UpdateGame();							/* 게임판 업데이트 */
-
-	delete node;  // 위에서 생성한 node 객체 반환
-	delete tttAI;  // 위에서 생성한 AI 객체 반환
-
-	m_board.CheckState();			/* 게임판 상태를 점검 */
-	if (m_board.state != GameBoard::STATE_PLAY)  // 게임이 끝났다면
-	{
-		EndGame();					/* 플레이 중이 아닌 상태면 게임 종료 */
-		UpdateGame();	/* 상대방 보드판에도 출력 */
-	}
-	else  // 게임이 끝나지 않았다면
-	{
-		m_board.order = 0;  // 사용자의 플레이 차례
-		UpdateGame();  // 사용자의 게임판의 정보를 업데이트
-		m_undoA.EnableWindow(true);
 	}
 }
 

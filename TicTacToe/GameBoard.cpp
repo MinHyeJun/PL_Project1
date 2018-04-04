@@ -72,7 +72,7 @@ void GameBoard::InitBoard(int startCom, int movedCnt, int nlevelB)
 {
 	moveCnt = movedCnt;		/* 몇번 째 수를 저장 */
 
-	if(startCom == 0)		/* 시작 플레이어와 컴퓨터 레벨을 설정, 시작 플레이어가 사용자인 경우 */
+	if(startCom == 0)		/* 시작 플레이어와 컴퓨터/ 레벨을 설정, 시작 플레이어가 사용자인 경우 */
 	{	
 		starterCom = 'X';		oppnentCom = 'O';
 		startLevel = 0;	        oppLevel = nlevelB;			
@@ -183,7 +183,7 @@ void GameBoard::CheckState()
 			}
 		}
 
-		/* 새로 방향을 검사 */
+		/* 세로 방향을 검사 */
 		if(board[0][i]!=' ')  // i열의 첫 행이 비어있지 않다면
 		{
 			if((board[0][i]=='X') && (board[1][i]=='X') && (board[2][i]=='X') && (board[3][i]=='X'))  // i열이 모두 X인 경우

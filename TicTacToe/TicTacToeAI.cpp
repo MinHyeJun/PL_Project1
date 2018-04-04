@@ -114,7 +114,6 @@ int TicTacToeAI::Minimize(struct treeNode* root)
 		int newValue = Maximize(root->next[i]);		/* Max함수호출로 값을 구해서 */
 		root->next[i]->eval = newValue;				/* 노드에 저장 */
 		tttBoard.UndoMove();						/* 두었던 수를 무름 */
-		std::cout << "evaluating";
 
 		if( newValue < bestValue )	/* 구한 eval값이 best값보다 작다면 */
 		{				
@@ -396,10 +395,7 @@ int TicTacToeAI::EvaluateBoard(struct treeNode* root)
 		(calBoard[3][0] == 'O' || calBoard[3][0] == ' '))
 		comB++;
 
-	/* 현재 AI기준이 컴퓨터 A인지 B인지에 따라 이길수있는 수를 계산해서 반환 */
-	if(criterion == 'X')
-		eval = comA-comB;
-	else
-		eval = comB-comA; 
+	/* 이길수있는 수를 계산해서 반환 */
+	eval = comB-comA; 
 	return eval;
 };
