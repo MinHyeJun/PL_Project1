@@ -341,7 +341,7 @@ void CTicTacToeDlg::SetGame()
 	m_comboB.AddString(L"Level 5");
 
 	// 상태창에 초기 텍스트를 셋팅
-	GetDlgItem(IDC_EDIT_B)->SetWindowTextW(L"<게임 트리>");
+	GetDlgItem(IDC_EDIT_B)->SetWindowTextW(L"게임 시작을 위해 새 게임을 눌러주세요.");
 
 	// 디폴트로 레벨 3
 	m_comboB.SetCurSel(0);
