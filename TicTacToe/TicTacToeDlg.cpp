@@ -258,7 +258,7 @@ void CTicTacToeDlg::OnBnClickedButtonUndoA()
 
 	GetDlgItem(IDC_EDIT_B)->SetWindowTextW(L"한 수 무르기를 사용하였습니다.");
 
-	if (m_board.moveCnt < 2)  // 게임판에 두어진 수가 2개 미만일 때 한 수 무르기 사용 불가
+	if (m_board.moveCnt - m_loadMoveCnt < 2)  // 현재 게임에서 두어진 수가 2개 미만일 때 한 수 무르기 사용 불가
 		m_undoA.EnableWindow(false);
 }
 
@@ -371,15 +371,13 @@ void CTicTacToeDlg::StartGame()
 		{
 			m_board.InitBoard(m_startCom, 0, m_levelB);	/* 아니라면, 새로운 판으로 초기화 */
 			m_board.order = 0;  // 사용자부터 게임을 시작하기 때문에 게임 순서 사용자로 셋팅
+			m_loadMoveCnt = 0;  // 불러오기를 통해 불러온 수가 없으므로 0으로 초기화
 		}
 
 		GetDlgItem(IDC_EDIT_B)->SetWindowTextW(L"게임을 시작합니다.");
 		UpdateGame();  // 게임판을 화면으로 보여주는 함수 호출
 
-		if(m_board.moveCnt < 2)
-			m_undoA.EnableWindow(FALSE);
-		else
-			m_undoA.EnableWindow(TRUE);
+		m_undoA.EnableWindow(FALSE);  // 한 수 무르기 버튼 접근 불가
 
 		m_board.state = GameBoard::STATE_PLAY;						/* 보드판 상태를 플레이 중으로 변경 */
 
@@ -714,7 +712,8 @@ void CTicTacToeDlg::LoadGame()
 			}
 
 			UpdateData(FALSE);
-			m_isLoad = Acnt + Bcnt;  // 게임 로드 여부 저장
+			m_loadMoveCnt = m_isLoad = Acnt + Bcnt;  // 게임 로드 여부 저장
+			m_board.moveCnt = m_isLoad;
 			UpdateGame();  // 게임판 정보를 버튼에 적용
 			// 두 게임 상태창을 초기화
 
@@ -723,7 +722,7 @@ void CTicTacToeDlg::LoadGame()
 
 			if (m_board.state != GameBoard::STATE_DRAW && m_board.state != GameBoard::STATE_WINA && m_board.state != GameBoard::STATE_WINB)  // 게임이 끝나지 않았다면
 			{
-				GetDlgItem(IDC_EDIT_B)->SetWindowTextW(L"<게임 트리>");
+				GetDlgItem(IDC_EDIT_B)->SetWindowTextW(L"게임을 불러왔습니다.");
 				
 
 				if (Acnt > Bcnt)			/* 'X'와 'O' 문자 개수를 비교 */

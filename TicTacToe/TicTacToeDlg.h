@@ -67,6 +67,7 @@ public:
 	int m_startCom;			/* 시작하는 COM 종류 */
 	int m_isLoad;			/* 게임이 로드 된 건지 구분 */
 	int m_checkUndo;		/* 무르기를 했는지 여부 구분 */
+	int m_loadMoveCnt;      // 불러온 파일에 놓여진 수의 개수
 	void PlayAI();          // 컴퓨터가 수를 놓는 함수
 
 	// 사용자가 플레이를 위해 클릭하는 게임판의 버튼 클릭 함수
